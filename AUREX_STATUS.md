@@ -1,7 +1,10 @@
 > **2026-11-02 follow-up:** Linux startup picker/native UI testing and Android SAF
 > read-only implementation are being validated. The historical snapshot below is
 > superseded where noted by [the current report](docs/reports/PRODUCTION_READINESS_2026-11-02.md).
-> No production release is claimed.
+> Current evidence: 44 Rust/18 Python tests pass; Android ARM64/x86-64 APK build
+> verification passes, and Linux native WebView smoke passes. Full Linux/Android
+> runtime acceptance and dependency
+> security gates remain open. No production release is claimed.
 
 # AUREX status
 

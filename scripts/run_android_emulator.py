@@ -14,13 +14,16 @@ def main():
     parser.add_argument("--prepare-ci", action="store_true")
     args = parser.parse_args()
     sdk = pathlib.Path(os.environ["ANDROID_HOME"])
+    # Hosted SDK binaries are not guaranteed to be exported on PATH. The same
+    # SDK's adb must be used by this owner and its smoke-test child.
+    os.environ["PATH"] = str(sdk / "platform-tools") + os.pathsep + os.environ.get("PATH", "")
     log_path = pathlib.Path("artifacts/android/x86_64-linux-android/emulator.log")
     log_path.parent.mkdir(parents=True, exist_ok=True)
     if args.prepare_ci:
         if os.environ.get("GITHUB_ACTIONS") != "true":
             raise RuntimeError("Privileged SDK/KVM setup is restricted to disposable GitHub runners")
         for command, answer in [
-            ([str(sdk / "cmdline-tools/latest/bin/sdkmanager"), "system-images;android-35;google_apis;x86_64"], None),
+            ([str(sdk / "cmdline-tools/latest/bin/sdkmanager"), "platform-tools", "emulator", "system-images;android-35;google_apis;x86_64"], None),
             ([str(sdk / "cmdline-tools/latest/bin/avdmanager"), "create", "avd", "--name", "aurex-ci", "--package", "system-images;android-35;google_apis;x86_64", "--device", "pixel_4", "--force"], "no\n"),
             (["sudo", "setfacl", "-m", "u:" + os.environ["USER"] + ":rw", "/dev/kvm"], None),
         ]:
