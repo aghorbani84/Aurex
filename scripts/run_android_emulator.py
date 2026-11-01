@@ -6,32 +6,45 @@ import os
 import pathlib
 import subprocess
 import sys
+import tempfile
 import time
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--prepare-ci", action="store_true")
-    args = parser.parse_args()
+    parser.add_argument("--prepare-ci", action="store_true", required=True)
+    parser.parse_args()
+    if os.environ.get("GITHUB_ACTIONS") != "true":
+        raise RuntimeError("Emulator setup/wipe is restricted to disposable GitHub runners")
     sdk = pathlib.Path(os.environ["ANDROID_HOME"])
-    # Hosted SDK binaries are not guaranteed to be exported on PATH. The same
-    # SDK's adb must be used by this owner and its smoke-test child.
-    os.environ["PATH"] = str(sdk / "platform-tools") + os.pathsep + os.environ.get("PATH", "")
+    with tempfile.TemporaryDirectory(prefix="aurex-ci-avd-", dir=os.environ["RUNNER_TEMP"]) as owned:
+        # avdmanager and emulator releases can disagree about default HOME locations.
+        # Give both explicit, identical, private paths; never wipe an existing AVD.
+        os.environ["ANDROID_USER_HOME"] = owned
+        os.environ["ANDROID_EMULATOR_HOME"] = owned
+        os.environ["ANDROID_AVD_HOME"] = str(pathlib.Path(owned) / "avd")
+        pathlib.Path(os.environ["ANDROID_AVD_HOME"]).mkdir()
+        os.environ["ANDROID_SERIAL"] = "emulator-5554"
+        os.environ["PATH"] = str(sdk / "platform-tools") + os.pathsep + os.environ.get("PATH", "")
+        run_owned(sdk, pathlib.Path(owned))
+
+
+def run_owned(sdk, owned):
     log_path = pathlib.Path("artifacts/android/x86_64-linux-android/emulator.log")
     log_path.parent.mkdir(parents=True, exist_ok=True)
-    if args.prepare_ci:
-        if os.environ.get("GITHUB_ACTIONS") != "true":
-            raise RuntimeError("Privileged SDK/KVM setup is restricted to disposable GitHub runners")
-        for command, answer in [
-            ([str(sdk / "cmdline-tools/latest/bin/sdkmanager"), "platform-tools", "emulator", "system-images;android-35;google_apis;x86_64"], None),
-            ([str(sdk / "cmdline-tools/latest/bin/avdmanager"), "create", "avd", "--name", "aurex-ci", "--package", "system-images;android-35;google_apis;x86_64", "--device", "pixel_4", "--force"], "no\n"),
-            (["sudo", "setfacl", "-m", "u:" + os.environ["USER"] + ":rw", "/dev/kvm"], None),
-        ]:
-            result = subprocess.run(command, input=answer, text=True, capture_output=True, timeout=300)
-            if result.returncode:
-                raise RuntimeError("CI emulator preparation failed: " + " ".join(command) + "\n" + (result.stdout + result.stderr)[-10000:])
+    for command, answer in [
+        ([str(sdk / "cmdline-tools/latest/bin/sdkmanager"), "platform-tools", "emulator", "system-images;android-35;google_apis;x86_64"], None),
+        ([str(sdk / "cmdline-tools/latest/bin/avdmanager"), "create", "avd", "--name", "aurex-ci", "--path", str(owned / "avd/aurex-ci.avd"), "--package", "system-images;android-35;google_apis;x86_64", "--device", "pixel_4"], "no\n"),
+        (["sudo", "setfacl", "-m", "u:" + os.environ["USER"] + ":rw", "/dev/kvm"], None),
+    ]:
+        result = subprocess.run(command, input=answer, text=True, capture_output=True, timeout=300)
+        if result.returncode:
+            raise RuntimeError("CI emulator preparation failed: " + " ".join(command) + "\n" + (result.stdout + result.stderr)[-10000:])
+    if not (pathlib.Path(os.environ["ANDROID_AVD_HOME"]) / "aurex-ci.ini").is_file():
+        raise RuntimeError("avdmanager did not create the owned AVD descriptor; " +
+                           "; ".join(str(path) for path in owned.rglob("*.ini")))
     with log_path.open("w") as log:
-        with subprocess.Popen([str(sdk / "emulator/emulator"), "-avd", "aurex-ci", "-no-window", "-no-audio", "-no-boot-anim", "-no-snapshot", "-wipe-data", "-gpu", "swiftshader_indirect", "-memory", "2048", "-cores", "2"], stdout=log, stderr=subprocess.STDOUT) as emulator:
+        with subprocess.Popen([str(sdk / "emulator/emulator"), "-avd", "aurex-ci", "-port", "5554", "-no-window", "-no-audio", "-no-boot-anim", "-no-snapshot", "-wipe-data", "-gpu", "swiftshader_indirect", "-memory", "2048", "-cores", "2"], stdout=log, stderr=subprocess.STDOUT) as emulator:
             try:
                 deadline = time.monotonic() + 180
                 while time.monotonic() < deadline:

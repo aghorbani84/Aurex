@@ -6,7 +6,7 @@ import pathlib
 import tempfile
 import unittest
 from unittest.mock import patch
-from scripts import android_smoke
+from scripts import android_smoke, run_android_emulator
 
 
 class EmulatorHarnessSafety(unittest.TestCase):
@@ -26,3 +26,13 @@ class EmulatorHarnessSafety(unittest.TestCase):
     def test_ui_match_requires_enabled_nonempty_bounds(self):
         tree = android_smoke.ET.fromstring('<hierarchy><node text="Allow" enabled="false" bounds="[0,0][50,50]"/><node text="Allow" enabled="true" bounds="[0,0][0,0]"/></hierarchy>')
         self.assertIsNone(android_smoke.matching(tree, "Allow"))
+
+
+class EmulatorOwnerSafety(unittest.TestCase):
+    def test_refuses_non_ci_hosts_before_installing_or_wiping_any_avd(self):
+        with patch.object(run_android_emulator.sys, "argv", ["runner", "--prepare-ci"]), patch.dict(
+            run_android_emulator.os.environ, {}, clear=True
+        ), patch.object(run_android_emulator.subprocess, "run") as commands:
+            with self.assertRaisesRegex(RuntimeError, "restricted"):
+                run_android_emulator.main()
+            commands.assert_not_called()
