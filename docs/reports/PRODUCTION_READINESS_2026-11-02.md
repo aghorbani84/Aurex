@@ -58,20 +58,34 @@ are exact versions already present in the baseline lockfile.
 
 | Command/gate | Actual result |
 |---|---|
-| `scripts/check.sh` | PASS locally: 44 Rust + 15 Python tests, formatting, strict core Clippy, release CLI |
+| `scripts/check.sh` | PASS locally: 44 Rust + 18 Python tests, formatting, strict core Clippy, release CLI |
 | New document model regressions | PASS: opaque identities, forged/file navigation, atomic foreign-page refusal, stale pages, same-URI grant replacement, malformed URIs and resource limits |
 | Android artifact unit fixtures | PASS: real ELF header parsing, wrong ABI/4KiB/truncated refusal, debug identity/backup/permissions policy; mocked SDK transport is NOT a device test |
 | `validate_workflows.py` | PASS: six independent workflows, full SHAs/read-only credentials/timeouts/safe shell env |
 | zizmor1.31.1 auditor | PASS locally: no findings; does not audit application/native dependencies |
-| Linux native build + graphical test | PENDING new GitHub execution; no local GTK/WebKit/display |
-| Android native build/APKs | PENDING actual GitHub execution; no local SDK/NDK/JDK |
-| Android picker/grant/revocation runtime | NOT TESTED; source/model tests are not emulator/device evidence |
-| Dependency advisory/license gate | Prior desktop gate FAIL; re-execution required; no ignores/allow-list relaxation |
+| Linux native build + graphical test | Native compile PASS; graphical smoke FAIL in [run 41349270288](https://github.com/aghorbani84/Aurex/actions/runs/41349270288). Added bounded runtime annotations/software-renderer settings; rerun pending |
+| Android native build/APKs | Both native builds produced APKs in [run 41349270135](https://github.com/aghorbani84/Aurex/actions/runs/41349270135), then verifier FAIL: explicit cleartext attribute missing. Corrected config nesting and library manifest; full APK verification rerun pending |
+| Android picker/grant/revocation runtime | Emulator harness added for real system picker, preview, process-restart persistence, forget/cancel and fixture hashes; NOT YET EXECUTED. Physical-device refusal has unit coverage only |
+| Dependency advisory/license gate | [Run 41349270167](https://github.com/aghorbani84/Aurex/actions/runs/41349270167) FAIL: same five advisories/NCSA. Added explicit ARM64 mobile-feature graph; no ignores/allow-list relaxation |
 | Production signing/publication | NOT DONE, no secrets/keystores/release publication authorized |
 
 Raw ignored evidence: `artifacts/evidence/production-local-checks.log`,
 `production-workflow-security.log`; hosted runs/artifacts must be recorded after
 actual execution, not inferred from YAML or filenames.
+
+Additional actual hosted evidence at `be8d8ed`: core [CI 41349270285](https://github.com/aghorbani84/Aurex/actions/runs/41349270285)
+PASS; Linux CLI packaging PASS; Windows native compile [41349270192](https://github.com/aghorbani84/Aurex/actions/runs/41349270192)
+PASS (not Windows filesystem/runtime support). Workflow/secret-scanning job PASS.
+Actions log/artifact downloads are blocked by this sandbox's outbound-host restrictions;
+checks API annotations remain accessible. The first Linux runtime failure had no
+application annotation; its precise cause is unknown, not assumed to be GPU-related.
+
+The pinned Dioxus Android template contains an explicit loopback-only HTTP exception
+in its generated network-security resource. `usesCleartextTraffic=false` does not
+override that API24+ resource. Engineering APKs must not be represented as completely
+network-denied; review/remove the template exception before production distribution.
+Native SAF now also independently rejects virtual entries and changed document kinds,
+not merely disabled UI buttons. Physical/cloud provider and lifecycle validation remain open.
 
 ## Remaining production gates
 

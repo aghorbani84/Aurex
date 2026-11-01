@@ -13,8 +13,10 @@ pub fn install(enabled: bool) {
                 );
                 dioxus::desktop::window().close();
             }
-            _ => {
-                eprintln!("AUREX_GUI_SMOKE_FAIL: native UI assertion or evaluation failed");
+            outcome => {
+                eprintln!(
+                    "AUREX_GUI_SMOKE_FAIL: native UI assertion or evaluation failed: {outcome:?}"
+                );
                 std::process::exit(1);
             }
         }

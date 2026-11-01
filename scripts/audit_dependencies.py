@@ -22,6 +22,9 @@ def commands():
         scans += [(scope + "-audit", ["cargo", "audit", "--file", lock]),
                   (scope + "-deny", ["cargo", "deny", "--manifest-path", manifest, "--config", "deny.toml", "--locked",
                                     "check", "advisories", "licenses", "bans", "sources"])]
+    scans.append(("mobile-deny", ["cargo", "deny", "--manifest-path", "apps/aurex-app/Cargo.toml",
+                  "--config", "deny.toml", "--locked", "--target", "aarch64-linux-android",
+                  "--no-default-features", "--features", "mobile", "check", "advisories", "licenses", "bans", "sources"]))
     return scans
 
 

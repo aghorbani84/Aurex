@@ -28,7 +28,9 @@ def elf_alignment(data, machine):
         raise ValueError("invalid ELF program header table")
     loads = [struct.unpack_from("<IIQQQQQQ", data, offset + i * size) for i in range(count)
              if struct.unpack_from("<I", data, offset + i * size)[0] == 1]
-    if not loads or any(header[7] < 16384 for header in loads):
+    if not loads or any(header[7] < 16384 or header[7] & (header[7] - 1)
+                        or header[5] > header[6] or header[2] + header[5] > len(data)
+                        or header[2] % 16384 != header[3] % 16384 for header in loads):
         raise ValueError("native library is not linked for 16 KiB pages")
     return len(loads)
 

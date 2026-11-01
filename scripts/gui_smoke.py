@@ -38,9 +38,16 @@ def main():
             report["passed"] = True
     except (OSError, ValueError, subprocess.SubprocessError) as error:
         report["error"] = str(error)
+        if isinstance(error, subprocess.TimeoutExpired):
+            def text(value):
+                return value.decode("utf-8", errors="replace") if isinstance(value, bytes) else value or ""
+            report["diagnostic_tail"] = (text(error.stdout) + text(error.stderr))[-8000:]
     path.write_text(json.dumps(report, indent=2) + "\n")
     print("PASS: native GUI fixture" if report["passed"] else "FAIL: native GUI fixture; see runtime.json")
     if not report["passed"]:
+        if os.environ.get("GITHUB_ACTIONS") == "true":
+            detail = (report.get("error", "Native fixture failed") + "\n" + report.get("diagnostic_tail", ""))[-10000:]
+            print("::error title=Linux native runtime test failed::" + detail.replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A"))
         raise SystemExit(1)
 
 

@@ -215,7 +215,7 @@ pub fn App() -> Element {
     // Updating the session during render would invalidate hooks. Register the exact visible
     // page atomically inside each event, then authorize its selected identity.
     let allowed = matches!(acceptance, Some(Ok(_)));
-    let authorized_session = acceptance.and_then(Result::ok);
+    let authorized_session = acceptance.and_then(Result::ok).map(std::sync::Arc::new);
     let choose_scheduler = scheduler.clone();
     let forget_scheduler = scheduler.clone();
     let filter_text = filter().to_lowercase();
@@ -260,12 +260,13 @@ pub fn App() -> Element {
                             for document in displayed.iter().filter(|d| d["name"].as_str().unwrap_or("").to_lowercase().contains(&filter_text)) {
                                 { let uri=document["uri"].as_str().unwrap_or("").to_owned(); let name=document["name"].as_str().unwrap_or("Unnamed document").to_owned();
                                   let directory=document["directory"].as_bool().unwrap_or(false); let virtual_file=document["virtual"].as_bool().unwrap_or(true);
-                                  let current=authorized_session.clone(); let scheduler=scheduler.clone(); rsx! {
-                                    button { class: "mobile-document", key: "{uri}", role: "listitem", disabled: virtual_file && !directory,
+                                  let current=authorized_session.clone(); let scheduler=scheduler.clone(); let row_key=uri.clone(); rsx! {
+                                    button { class: "mobile-document", key: "{row_key}", role: "listitem", disabled: virtual_file,
                                         onclick: move |_| {
-                                            let Some(mut current)=current.clone() else { return; };
+                                            let Some(current)=current.clone() else { return; };
                                             if directory {
-                                                match current.enter(&uri) { Ok(()) => { session.set(Some(current)); filter.set(String::new()); }, Err(e) => message.set(e.to_string()) }
+                                                let mut next=(*current).clone();
+                                                match next.enter(&uri) { Ok(()) => { session.set(Some(next)); filter.set(String::new()); }, Err(e) => message.set(e.to_string()) }
                                             } else {
                                                 if let Err(e)=current.authorize_preview(&uri) { message.set(e.to_string()); return; }
                                                 let scheduler=scheduler.clone(); let uri=uri.clone(); let token:DocumentRequest=current.request();

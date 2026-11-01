@@ -67,6 +67,9 @@ jobs:
           if-no-files-found: error
           retention-days: 14
       - name: Exercise the actual Linux WebView on a private virtual display
+        env:
+          LIBGL_ALWAYS_SOFTWARE: '1'
+          WEBKIT_DISABLE_DMABUF_RENDERER: '1'
         run: dbus-run-session -- xvfb-run -a python scripts/gui_smoke.py
       - name: Upload native runtime results, including failures
         if: always()

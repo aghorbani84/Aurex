@@ -22,6 +22,7 @@ import java.util.concurrent.TimeUnit
 
 /** Read-only SAF boundary. Only provider-discovered identities may reach ContentResolver. */
 class StoragePlugin(private val activity: Activity) {
+    private data class DocumentKind(val directory: Boolean, val virtual: Boolean)
     companion object {
         private const val PREFS = "aurex.saf.grants.v1"
         private const val MAX_KNOWN = 4096
@@ -33,7 +34,7 @@ class StoragePlugin(private val activity: Activity) {
         private var generation = 0L
         private var picking = false
         private var lastError: String? = null
-        private val known = HashMap<String, Boolean>()
+        private val known = HashMap<String, DocumentKind>()
         private var launcher: ActivityResultLauncher<Intent>? = null
         private var launcherActivity: WeakReference<ComponentActivity>? = null
         private val timers = ScheduledThreadPoolExecutor(1) { runnable ->
@@ -52,7 +53,7 @@ class StoragePlugin(private val activity: Activity) {
         generation += 1
         rootTree = tree
         known.clear()
-        if (tree != null) known[documentRoot(tree).toString()] = true
+        if (tree != null) known[documentRoot(tree).toString()] = DocumentKind(true, false)
     }
     private fun grant(): Uri = synchronized(lock) {
         if (!initialized) {
@@ -74,7 +75,8 @@ class StoragePlugin(private val activity: Activity) {
     }
     private fun authorize(tree: Uri, value: String, directory: Boolean): Uri = synchronized(lock) {
         check(rootTree == tree) { "Folder grant changed; retry the current view" }
-        require(value.length <= 16384 && known[value] == directory) { "Document was not discovered in this folder grant" }
+        val kind = known[value]
+        require(value.length <= 16384 && kind != null && kind.directory == directory && !kind.virtual) { "Document was not discovered in this folder grant" }
         val uri = Uri.parse(value)
         require(uri.scheme == "content" && uri.authority == tree.authority &&
             DocumentsContract.getTreeDocumentId(uri) == DocumentsContract.getTreeDocumentId(tree)) {
@@ -140,6 +142,11 @@ class StoragePlugin(private val activity: Activity) {
                 }
                 val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).addFlags(
                     Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION or Intent.FLAG_GRANT_PREFIX_URI_PERMISSION)
+                if (android.os.Build.VERSION.SDK_INT >= 26) {
+                    // A picker hint, not an access grant. The OS still asks the user.
+                    intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, DocumentsContract.buildDocumentUri(
+                        "com.android.externalstorage.documents", "primary:Documents"))
+                }
                 launcher!!.launch(intent)
             } catch (error: Exception) {
                 synchronized(lock) { picking = false; lastError = error.message ?: "Cannot open folder picker" }
@@ -195,7 +202,12 @@ class StoragePlugin(private val activity: Activity) {
             val additions = entries.map { it.getString("uri") }
             require(additions.toSet().size == additions.size) { "Provider returned duplicate document identities" }
             require(known.size + additions.count { !known.containsKey(it) } <= MAX_KNOWN) { "Session document limit; reselect folder" }
-            for (entry in entries) known[entry.getString("uri")] = entry.getBoolean("directory")
+            val discovered = entries.associate { entry -> entry.getString("uri") to
+                DocumentKind(entry.getBoolean("directory"), entry.getBoolean("virtual")) }
+            require(discovered.all { (uri, kind) -> known[uri] == null || known[uri] == kind }) {
+                "Document kind changed; reselect folder"
+            }
+            known.putAll(discovered)
         }
         JSONObject().put("documents", JSONArray(entries)).put("truncated", truncated).put("generation", epoch)
     }

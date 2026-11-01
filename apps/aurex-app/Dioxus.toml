@@ -9,4 +9,6 @@ short_description = "Root-scoped local file manager"
 min_sdk = 24
 compile_sdk = 35
 target_sdk = 35
+
+[android.application]
 uses_cleartext_traffic = false

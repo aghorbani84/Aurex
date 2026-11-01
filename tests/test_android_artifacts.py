@@ -21,8 +21,17 @@ def elf(machine=183, alignment=16384):
 class AndroidArtifactSafety(unittest.TestCase):
     def test_real_elf_header_architecture_and_16k_requirement(self):
         self.assertEqual(build_android.elf_alignment(elf(), 183), 1)
-        for data in [elf(62), elf(alignment=4096), b"not ELF", elf()[:80]]:
+        for data in [elf(62), elf(alignment=4096), elf(alignment=20000), b"not ELF", elf()[:80]]:
             with self.assertRaises(ValueError):
+                build_android.elf_alignment(data, 183)
+
+    def test_invalid_load_segment_bounds_and_congruence(self):
+        for field, value in [(5, 121), (6, 119), (2, 1), (3, 1)]:
+            data = bytearray(elf())
+            header = list(struct.unpack_from("<IIQQQQQQ", data, 64))
+            header[field] = value
+            struct.pack_into("<IIQQQQQQ", data, 64, *header)
+            with self.subTest(field=field), self.assertRaises(ValueError):
                 build_android.elf_alignment(data, 183)
 
     def manifest(self, permission="", backup="false", debug="true", package="io.github.aghorbani84.aurex"):
