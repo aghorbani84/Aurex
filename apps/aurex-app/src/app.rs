@@ -62,6 +62,8 @@ impl Explorer {
 #[component]
 pub fn App() -> Element {
     let ctx = use_context::<AppContext>();
+    #[cfg(feature = "gui-smoke")]
+    crate::smoke::install(ctx.smoke);
     let left = use_signal(PaneState::default);
     let right = use_signal(PaneState::default);
     let active = use_signal(|| false);

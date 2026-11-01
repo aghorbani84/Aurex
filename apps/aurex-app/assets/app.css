@@ -762,3 +762,8 @@ footer {
     transition: none !important;
   }
 }
+
+.startup-grant { width:min(640px,100%); margin:auto; padding:32px; line-height:1.7; }
+.startup-grant h1 { font-size:32px; margin-bottom:20px; }
+.startup-grant p { margin:16px 0; color:var(--muted); }
+.startup-grant button { min-height:48px; padding:12px 24px; }

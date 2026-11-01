@@ -66,8 +66,8 @@ class ArchiveSafety(unittest.TestCase):
     def test_android_cannot_misreport_packaging_as_verified(self):
         report = platform_gate.inspect_android()
         self.assertFalse(report["packaging_verified"])
-        self.assertEqual(report["state"], "BLOCKED")
-        self.assertFalse(report["checks"]["android_storage_provider"])
+        self.assertIn(report["state"], ["BLOCKED", "PREREQUISITES_ONLY"])
+        self.assertTrue(report["checks"]["android_storage_provider"])
 
     @unittest.skipUnless(platform.system() == "Linux" and platform.machine() == "x86_64", "validated package target only")
     def test_actual_candidate_is_reproducible_and_launches(self):
@@ -89,16 +89,16 @@ class AuditFailurePolicy(unittest.TestCase):
             return SimpleNamespace(returncode=1 if len(calls) == 1 else 0, stdout="fixture diagnostic", stderr="")
         with contextlib.redirect_stdout(io.StringIO()):
             results = audit_dependencies.collect(runner)
-        self.assertEqual(len(calls), 4)
+        self.assertEqual(len(calls), 5)
         self.assertFalse(all(r["exit_code"] == 0 for r in results))
-        self.assertEqual(results[-1]["check"], "desktop-deny")
+        self.assertEqual(results[-1]["check"], "mobile-deny")
 
     def test_missing_tools_remain_failed_checks(self):
         def missing(*args, **kwargs):
             raise FileNotFoundError("controlled missing tool")
         with contextlib.redirect_stdout(io.StringIO()):
             results = audit_dependencies.collect(missing)
-        self.assertEqual(len(results), 4)
+        self.assertEqual(len(results), 5)
         self.assertTrue(all(r["exit_code"] != 0 for r in results))
 
 

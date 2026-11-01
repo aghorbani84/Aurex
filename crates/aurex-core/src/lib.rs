@@ -179,3 +179,5 @@ impl std::error::Error for Error {
 pub type Result<T> = std::result::Result<T, Error>;
 
 pub mod navigation;
+
+pub mod documents;

@@ -8,17 +8,18 @@ error suppression or repository-settings changes are used.
 | Workflow | Responsibility |
 |---|---|
 | ci.yml | Native Linux/Windows core check/fmt/Clippy/tests/release compilation; Python fixture tests |
-| build-linux.yml | Validated unsigned CLI candidate archive; independent actual Dioxus release build |
+| build-linux.yml | Validated unsigned CLI candidate archive; independent actual Dioxus release build + real WebView fixture gate |
 | build-windows.yml | Native MSVC CLI/help and Dioxus release build; no unusable file-manager package |
-| build-android.yml | Manual **failing readiness gate**, diagnostic JSON only; not APK packaging |
+| build-android.yml | Real SDK35/NDKr28b two-ABI debug APK builds/verification, x86-64 emulator SAF acceptance, diagnostics |
 | security.yml | actionlint 1.7.12, zizmor 1.31.1 auditor, Gitleaks 8.30.1, cargo-audit 0.22.2, cargo-deny 0.20.2 |
 | release.yml | Manual CLI engineering artifact build only; cannot publish a Release/tag/deployment |
 
-Android is not implemented, so an honest gate is preferable to speculative SDK/NDK
-YAML that pretends to produce a usable APK. The gate is deliberately not a required
-PR check yet. Replace it with an actual SDK/NDK/JNI/SAF/package/signature/runtime
-workflow only when the mobile slice exists. No Android application identifier,
-keystore, signing password, AAB or VLC/mpv dependency is invented in this repository.
+Android now has a real read-only SAF/JNI slice and native APK build evidence.
+The workflow installs SHA256-verified official dx0.7.10, checks both ABIs/16KiB ELF
+alignment/debug certificates/app identity/permissions, and attempts a disposable
+Android35 x86-64 system-picker test. Runtime failure remains failure, not a packaging
+success claim. No production signing, AAB publishing, VLC/mpv dependency or secrets.
+See [current evidence](reports/PRODUCTION_READINESS_2026-11-02.md).
 
 Third-party actions use full verified upstream SHAs; checkout sets
 `persist-credentials: false`. Rust uses the hosted runner's rustup to install pinned
@@ -52,7 +53,8 @@ CodeQL Rust support and `act` were not enabled/claimed: neither substitutes for 
 native runtime matrix or tested scanners above. The local policy checker rejects
 unpinned actions, shell context interpolation, credential persistence, broad job
 permissions and hidden failures. It supplements, not replaces, actionlint/zizmor.
-Artifacts are bounded, checksummed, unsigned CLI-only candidates (RELEASES.md).
+Artifacts are bounded engineering outputs: unsigned CLI candidates and debug Android
+APKs with checksums/metadata; never production releases (RELEASES.md).
 See reports/AUREX_ENGINEERING_REPORT.md for actual run links/status, not YAML promises.
 
 ### First real GitHub run corrections
@@ -62,7 +64,8 @@ runtime tests, but reported Node 20 deprecation for the old action major version
 and a dependency-audit failure. Action pins were re-verified against current official
 Node 24 releases (checkout 7.0.1, setup-python 7.1.0, setup-go 7.0.0, cache 6.1.0,
 upload-artifact 7.0.2). cargo-audit 0.22.2's tagged MSRV is verified as 1.88.
-The audit runner now executes **all four graphs**, records real exit codes, fails if
+The audit runner now executes **all five checks** across core, desktop and explicit
+ARM64 mobile-feature dependency graphs, records real exit codes, fails if
 any check fails and emits escaped, bounded error annotations plus a diagnostic
 artifact. No advisory exception or vulnerability suppression was added. This also
 exposes actionable errors when egress blocks the GitHub log storage hostname.

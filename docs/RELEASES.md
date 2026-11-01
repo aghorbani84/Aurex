@@ -1,7 +1,10 @@
 # Engineering artifacts, not published releases
 
-The implemented package is an **unsigned Linux x86-64 CLI engineering candidate**,
-not the Dioxus GUI, a production release, an Android APK or a Windows file manager.
+The CLI package is an **unsigned Linux x86-64 engineering candidate**, not a
+production GUI/Windows release. Separately, Android now builds **debug-signed engineering
+APKs** for ARM64/x86-64, with checksums and build-verification metadata. Their native
+builds passed, but runtime and dependency-security acceptance remain open; see the
+[current report](reports/PRODUCTION_READINESS_2026-11-02.md) and BUILDING.md.
 
 ```sh
 cargo build --workspace --release --locked
@@ -32,8 +35,8 @@ candidate workflow is manually requested and build-only, with read-only reposito
 permissions. It does not publish, deploy, create tags, access signing secrets or
 change protected environments/settings. Official publication requires separate
 explicit authorization and native GUI/platform runtime, dependency/license/security
-and signing acceptance. Windows GUI builds are compile/link evidence only; Android
-readiness is a deliberate failing gate until a real mobile app + SAF exists.
+and signing acceptance. Windows GUI builds are compile/link evidence only. Android has real SAF and APK
+build/verification jobs; the emulator runtime and production-release gates remain open.
 
 The archive helper always rebuilds locked sources for the explicit advertised
 `x86_64-unknown-linux-gnu` target before stamping source/toolchain metadata. It
