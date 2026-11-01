@@ -1,0 +1,30 @@
+name: Android packaging readiness (blocked)
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: android-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  readiness:
+    name: Android blockers and readiness report
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: '3.11'
+      - name: Fail closed until actual mobile entrypoint and SAF exist
+        run: python scripts/platform_gate.py
+      - name: Upload diagnostic report, never an imaginary APK
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: android-readiness-${{ github.sha }}
+          path: artifacts/android/readiness.json
+          if-no-files-found: error
+          retention-days: 14

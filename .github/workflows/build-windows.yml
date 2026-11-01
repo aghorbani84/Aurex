@@ -1,0 +1,46 @@
+name: Windows native compilation (provider not implemented)
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: windows-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  desktop-build:
+    name: Native desktop build (runtime not accepted)
+    runs-on: windows-2022
+    timeout-minutes: 45
+    env:
+      CARGO_BUILD_JOBS: '2'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install pinned Rust with native rustup
+        run: rustup toolchain install 1.88.0 --profile minimal
+      - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            apps/aurex-app/target
+          key: ${{ runner.os }}-${{ runner.arch }}-rust-1.88.0-desktop-${{ hashFiles('apps/aurex-app/Cargo.lock') }}
+      - run: rustc --version --verbose
+      - run: cargo build --workspace --release --locked
+      - name: Verify CLI binary launches (not filesystem support)
+        run: .\target\release\aurex-cli.exe --help
+      - name: Native GUI compile with bounded API-readable diagnostics
+        run: python scripts/build_desktop.py
+      - name: Upload desktop compiler diagnostics, not a runtime acceptance
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: desktop-compilation-windows-${{ github.sha }}
+          path: artifacts/desktop/compilation.json
+          if-no-files-found: error
+          retention-days: 14
+      # No installer/portable file manager package until the native provider + runtime pass.

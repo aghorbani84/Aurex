@@ -1,0 +1,12 @@
+/target/
+**/target/
+.arena/
+.aurex-lab/
+*.keystore
+*.jks
+.env
+/artifacts/
+
+__pycache__/
+*.pyc
+/artifacts-gitleaks.json
