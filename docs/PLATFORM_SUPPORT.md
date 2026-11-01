@@ -19,7 +19,7 @@ no complete platform has passed that gate yet.
 | Permissions / ownership / ACL manager | Not implemented | Not implemented | Provider flags pending |
 | Mount/device/storage dashboard | Not implemented | Not implemented | Not implemented |
 | Archives / APK / remote / plugins | Not implemented | Not implemented | Not implemented |
-| Native runtime validation / packaging | CLI only; no GUI/installers | None | None |
+| Native runtime validation / packaging | CLI archive smoke verified; no GUI/installers | Core/help only, no functional provider package | None |
 
 Linux implementation is architecture-gated to x86-64, uses procfs and Linux-specific
 open/rename/link flags. Other architectures are not enabled merely because they run

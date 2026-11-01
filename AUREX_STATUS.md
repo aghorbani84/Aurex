@@ -22,7 +22,7 @@ installer, or fully supported platform is claimed.
   shared progress, UTF-8 previews capped at 256 KiB.
 - Bounded navigation/tab model with independent histories and selection.
 - **37 passing Rust tests**: 19 filesystem integration, 6 copy-fault regressions,
-  4 navigation, 4 executor, 4 CLI integration; plus **6 Python engineering tests**.
+  4 navigation, 4 executor, 4 CLI integration; plus **8 Python engineering tests**.
 - Formatting, Clippy with warnings denied, release build, and CLI smoke benchmarks.
 
 ## Implemented source, NOT accepted as working GUI

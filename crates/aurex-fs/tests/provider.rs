@@ -2,6 +2,7 @@
 use aurex_core::*;
 use aurex_fs::{FilesystemProvider, LocalProvider};
 use aurex_tasks::{Cancellation, Progress, Scheduler};
+use std::os::unix::fs::DirBuilderExt;
 use std::{
     fs,
     path::{Path, PathBuf},
@@ -17,7 +18,7 @@ impl Lab {
             ID.fetch_add(1, Ordering::Relaxed)
         ));
         // create_dir (not create_dir_all) ensures tests never adopt an existing directory.
-        fs::create_dir(&path).unwrap();
+        fs::DirBuilder::new().mode(0o700).create(&path).unwrap();
         Self(path)
     }
     fn path(&self, name: impl AsRef<Path>) -> PathBuf {

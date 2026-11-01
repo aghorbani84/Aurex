@@ -1,4 +1,5 @@
 #![cfg(all(target_os = "linux", target_arch = "x86_64"))]
+use std::os::unix::fs::DirBuilderExt;
 use std::{
     fs,
     path::PathBuf,
@@ -14,7 +15,7 @@ impl Lab {
             std::process::id(),
             ID.fetch_add(1, Ordering::Relaxed)
         ));
-        fs::create_dir(&root).unwrap();
+        fs::DirBuilder::new().mode(0o700).create(&root).unwrap();
         Self(root)
     }
     fn run(&self, args: &[&str]) -> Output {

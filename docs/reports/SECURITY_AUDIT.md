@@ -45,3 +45,23 @@ warnings. `artifacts/evidence/zizmor.log`: exit 0, auditor persona, "No findings
 report". `actionlint.log`: exit 0 (shellcheck/pyflakes unavailable locally, core
 workflow structural/type checks enabled). These are scoped workflow results, not
 a declaration that dependency or application security is complete.
+
+Gitleaks built from official v8.30.1 tagged source was also run locally: exit 0,
+"2 commits scanned", "no leaks found" (redacted report). Local Go dependency metadata
+was adapted for the egress-constrained build; no scanner/native binary is shipped in
+AUREX. GitHub independently ran the normal official-source scanner job successfully.
+Rust fixtures now explicitly use mode-0700 exclusive roots, not just unique names.
+
+## Confirmed hosted dependency findings (not a clean bill of health)
+
+Run [41344252493](https://github.com/aghorbani84/Aurex/actions/runs/41344252493)
+executed every graph. Only **desktop-deny** failed; both cargo-audit invocations and
+core deny exited 0. Deny catches stricter unsound/unmaintained policy than audit's
+default. The visible annotation confirms Tokio 1.48.0's **RUSTSEC-2026-0386** I/O
+safety issue and old rand 0.7.3 via phf_generator → selectors → kuchikiki → wry.
+No ignore was added. Tokio is narrowly updated to **1.51.6**, a fixed branch named
+in the advisory (registry MSRV 1.71/checksum verified), requiring tokio-macros 2.7.2.
+The lock diff updates only those two packages; this is not a mass dependency upgrade.
+The remaining obsolete transitive GUI ecosystem is a release blocker pending full
+annotated rerun. The root 0.21.2 audit failure disappeared with verified 0.22.2;
+the original inaccessible diagnostic was never established, so no causal claim is made.

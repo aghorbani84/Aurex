@@ -553,6 +553,7 @@ pub(super) fn execute(
 #[cfg(test)]
 mod fault_tests {
     use super::*;
+    use std::os::unix::fs::DirBuilderExt;
     use std::sync::atomic::{AtomicU64, Ordering};
     static ID: AtomicU64 = AtomicU64::new(0);
     struct Lab(PathBuf);
@@ -563,7 +564,10 @@ mod fault_tests {
                 std::process::id(),
                 ID.fetch_add(1, Ordering::Relaxed)
             ));
-            std::fs::create_dir(&path).unwrap();
+            std::fs::DirBuilder::new()
+                .mode(0o700)
+                .create(&path)
+                .unwrap();
             std::fs::write(path.join("source"), vec![b'a'; 400_000]).unwrap();
             Self(path)
         }

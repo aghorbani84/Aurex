@@ -33,5 +33,14 @@ jobs:
       - run: cargo build --workspace --release --locked
       - name: Verify CLI binary launches (not filesystem support)
         run: .\target\release\aurex-cli.exe --help
-      - run: cargo build --manifest-path apps/aurex-app/Cargo.toml --release --locked
+      - name: Native GUI compile with bounded API-readable diagnostics
+        run: python scripts/build_desktop.py
+      - name: Upload desktop compiler diagnostics, not a runtime acceptance
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: desktop-compilation-windows-${{ github.sha }}
+          path: artifacts/desktop/compilation.json
+          if-no-files-found: error
+          retention-days: 14
       # No installer/portable file manager package until the native provider + runtime pass.

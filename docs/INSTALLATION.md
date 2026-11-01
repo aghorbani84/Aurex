@@ -1,6 +1,8 @@
 # Installation
 
-There are no published AUREX packages or supported installers from this implementation.
+There are no published AUREX product releases or supported installers from this implementation.
+Unsigned Linux CLI engineering archives are built and smoke-validated (RELEASES.md);
+they are not the GUI product or a cross-platform release.
 Do not download purported release artifacts on the strength of this documentation.
 
 For development, follow BUILDING.md, build the CLI locally, and invoke

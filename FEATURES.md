@@ -27,6 +27,7 @@ implementation exists but has not passed compilation/runtime acceptance.
 | Device/mount/native permissions manager | Not implemented | No privilege escalation |
 | Windows filesystem / Android SAF | Not implemented | Provider constructor explicitly refuses |
 | Remote providers / plugins / assistant tools | Not implemented | No credential or network exposure |
-| Installers / signing / release packages | Not implemented | No platform release claim |
+| Linux CLI engineering archive | Tested | Unsigned, smoke-validated, SHA-256/metadata/scoped SBOM/Rust notices; not GUI release |
+| Installers / signing / product release packages | Not implemented | No platform release claim |
 
 The long-term target is the phased roadmap, not a description of this build.

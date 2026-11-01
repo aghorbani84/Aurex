@@ -7,7 +7,7 @@ Local run: 2026-11-01, Linux x86-64, Rust 1.88.0, kernel 6.1.158 sandbox.
 | CLI integration | PASS (4) | Real subprocess lifecycle, grants/confirm, conflict/traversal, literal crafted names |
 | Core navigation | PASS (4) | Branching history, independent tabs, reset selection, bounds |
 | Copy fault injection | PASS (6) | Midstream/precommit/postcommit cancellation, source mutation, injected ENOSPC/file-sync and directory-sync partial commit |
-| Python engineering | PASS (6) | Actual package launch/reproducibility, malicious package fixtures and Android fail-closed report |
+| Python engineering | PASS (8) | Actual package launch/reproducibility, malicious package fixtures and Android fail-closed report |
 | Task executor | PASS (4) | Real Future wake, panic isolation, deterministic queue backpressure, shared progress/cancel |
 | Filesystem provider | PASS (19) | See test names in `crates/aurex-fs/tests/provider.rs` |
 | Root formatting | PASS | `cargo fmt --all --check` |
@@ -46,5 +46,5 @@ removed by fixture owners. No tests touch existing user directories or mounts.
 - Windows UNC/ACL/locking/long/case paths; Android grant/revocation/provider cases.
 - Archive/plugin/credential tests belong to future implemented modules, not fake tests.
 
-The 37-Rust + 6-Python test total excludes doc-test suites with zero cases. CI files are test
+The 37-Rust + 8-Python test total excludes doc-test suites with zero cases. CI files are test
 **definitions**, not a statement that GitHub checks already passed.

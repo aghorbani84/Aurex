@@ -52,7 +52,8 @@ construction currently returns Unsupported; a compiled shell would not be a usab
 Windows file manager. Android has neither an SAF provider nor a verified mobile
 entrypoint/build configuration. No Android build/packaging job is fabricated.
 
-No RPM/DEB/AppImage/MSI/APK/AAB installer/signing workflow is implemented. Release
+An unsigned Linux CLI engineering archive is implemented and runtime-validated
+(see RELEASES.md). No RPM/DEB/AppImage/MSI/APK/AAB installer/signing workflow is implemented. Release
 builds must use official toolchain provenance, real native tests, dependency/license
 audits and secure signing before release packaging. Never commit signing material.
 

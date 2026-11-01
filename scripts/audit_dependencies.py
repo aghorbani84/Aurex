@@ -8,6 +8,7 @@ sandbox cannot download Actions logs/artifacts from external storage hosts.
 import json
 import os
 import pathlib
+import re
 import subprocess
 import uuid
 
@@ -33,6 +34,9 @@ def collect(runner=None):
             code, output = result.returncode, result.stdout + result.stderr
         except (OSError, subprocess.TimeoutExpired) as error:
             code, output = 1, str(error)
+        # Keep all finding headers/IDs even if the final verbose inclusion tree is huge.
+        summary = [line for line in output.splitlines() if
+                   re.search(r"^error|RUSTSEC-|(?:ID|Crate|Version|Title|Solution):", line)]
         # Disable workflow command interpretation while printing tool-controlled text.
         stop = "audit-" + uuid.uuid4().hex
         if os.environ.get("GITHUB_ACTIONS") == "true":
@@ -41,9 +45,9 @@ def collect(runner=None):
         if os.environ.get("GITHUB_ACTIONS") == "true":
             print(f"::{stop}::", flush=True)
             if code:
-                excerpt = (name + ": " + output[-6000:]).replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
+                excerpt = (name + ": " + "\n".join(summary)[:20000] + "\n" + output[-3000:]).replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
                 print(f"::error title=Dependency audit failure::{excerpt}", flush=True)
-        results.append({"check": name, "command": command, "exit_code": code, "diagnostic_tail": output[-16000:]})
+        results.append({"check": name, "command": command, "exit_code": code, "finding_summary": summary[:200], "diagnostic_tail": output[-16000:]})
     return results
 
 

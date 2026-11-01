@@ -83,7 +83,8 @@ None of these planned providers can currently be instantiated.
 
 ## Persistence and packaging
 
-No SQLite or saved sessions yet. No packaging/signing infrastructure. The two
+No SQLite or saved sessions yet. Validated unsigned Linux CLI engineering archive packaging exists; GUI/platform
+installers and signing infrastructure do not. The two
 Cargo.lock files pin actual applications; the root offline core is intentionally
 isolated from the native renderer's dependency graph. CI gates cover compilation,
 tests and auditing, but their execution and platform runtime are separate evidence.
