@@ -64,14 +64,27 @@ not compilation success or failure evidence.
 | [Security 41344877621](https://github.com/aghorbani84/Aurex/actions/runs/41344877621) | Tokio finding gone after patch; desktop deny still FAIL on five other advisories and a license requirement; no ignores |
 | [CI 41345497993](https://github.com/aghorbani84/Aurex/actions/runs/41345497993) | SUCCESS: native Linux/Windows core checks; Linux runs 37 Rust + 10 Python cases (Windows portable subset, Linux packaging case skipped) |
 | [Linux 41345497988](https://github.com/aghorbani84/Aurex/actions/runs/41345497988) | CLI fresh-target candidate PASS; GUI FAIL on one RSX list ownership error, now fixed with a separate selection-path snapshot |
-| [Windows 41345498006](https://github.com/aghorbani84/Aurex/actions/runs/41345498006) | GUI ownership-fix verification remains separate; no Windows filesystem acceptance |
+| [Windows 41345498006](https://github.com/aghorbani84/Aurex/actions/runs/41345498006) | FAIL before the final RSX ownership fix; no Windows filesystem acceptance |
 | [Security 41345497976](https://github.com/aghorbani84/Aurex/actions/runs/41345497976) | FAIL: five advisories plus libfuzzer-sys 0.4.13 NCSA policy rejection identified; see security review |
+
+**Final tested implementation revision:** `9bf74057269c6e869e004934b84c3ec793294af4`.
+
+| Final real run | Observed completed result |
+|---|---|
+| [CI 41346292796](https://github.com/aghorbani84/Aurex/actions/runs/41346292796) | **SUCCESS**: Linux/Windows core checks and engineering tests, platform-scoped |
+| [Linux 41346292730](https://github.com/aghorbani84/Aurex/actions/runs/41346292730) | **SUCCESS**: CLI runtime/package + native Dioxus release compilation (desktop job 5m39s); GUI runtime NOT TESTED |
+| [Windows 41346292701](https://github.com/aghorbani84/Aurex/actions/runs/41346292701) | **SUCCESS**: MSVC core/CLI help + native Dioxus release compilation (6m12s); filesystem provider/runtime absent |
+| [Security 41346292703](https://github.com/aghorbani84/Aurex/actions/runs/41346292703) | **FAIL**: workflow/secret scanner job PASS; all dependency graphs executed; desktop deny retains five advisory gates and NCSA policy rejection |
+
+Documentation-only follow-ups do not change the tested implementation. Their newly
+triggered checks must be read separately rather than borrowing a previous green run.
 
 GUI type fixes disambiguate the core `Location` from Dioxus's prelude and call
 struct-held Signals with `(explorer.field)()` rather than nonexistent methods.
 A subsequent hosted E0382 identified RSX evaluation consuming the entries vector
 before its selection callback cloned it; the callback now owns a distinct path-only
-snapshot created before RSX construction. That follow-up still needs hosted confirmation.
+snapshot created before RSX construction. The final native Linux/Windows runs above
+confirmed that follow-up compiles successfully; they do not validate GUI interaction.
 The sandbox cannot reach GitHub's `results-receiver.actions.githubusercontent.com`
 log-storage host. The new harness safely disables command interpretation while
 printing tool output, then emits bounded escaped compiler/finding annotations
@@ -92,6 +105,12 @@ was uploaded from PR merge revision `d653eb60fa6d018f5631597077bb29717648a940`
 GitHub artifact-container digest
 `sha256:b240455c4d49d0e8fed11c8d788eefced4bfb4f25829dd41395d078c99b3553d`.
 This is not the inner tar.gz checksum; that package has its own generated sidecar.
+
+The final implementation's [validated CLI artifact](https://github.com/aghorbani84/Aurex/actions/runs/41346292730/artifacts/13098714885)
+is 665,410 bytes, PR merge revision `a19260f3cb23b252dcabb32ed29d212e910b73d7`,
+branch head `9bf74057269c6e869e004934b84c3ec793294af4`. GitHub artifact-container digest:
+`sha256:668e1920d7becec92cfc005bd0b30042d86febd4ca766da53ed700c1e6a53327`.
+No GUI executable was distributed: compiler diagnostics are separate from product artifacts.
 
 Local ignored `artifacts/packages/aurex-cli-0.1.0-x86_64-unknown-linux-gnu.tar.gz`
 has adjacent `.sha256`, `build-metadata.json` and `sbom.cdx.json`. Contents include
@@ -119,7 +138,7 @@ battery or memory benchmark is claimed. [Method/gaps](../PERFORMANCE.md).
 
 - Resolve remaining native GUI security/license findings via maintained compatible
   upstream dependencies, with migration/API/native-runtime evidence, not ignores.
-- Verify hosted fixes, run the GUI on a real display and test focus/keyboard/touch,
+- Hosted compilation fixes passed; run the GUI on a real display and test focus/keyboard/touch,
   active-job shutdown, accessibility, native dependencies and full GUI lint.
 - Implement/test real Windows provider and Android SAF/mobile/native package path.
 - Real disk-full/short-write/kernel fsync, hostile identity replacement/mount/hardlink

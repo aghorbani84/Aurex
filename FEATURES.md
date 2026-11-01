@@ -1,7 +1,8 @@
 # Feature availability
 
 **Tested** means covered locally on Linux x86-64 core/CLI. **UI source** means wired
-implementation exists but has not passed compilation/runtime acceptance.
+implementation compiled natively on Linux/Windows but has not passed GUI runtime
+acceptance or strict GUI dependency/license policy.
 
 | Feature | State | Limits |
 |---|---|---|

@@ -10,7 +10,8 @@ For development, follow BUILDING.md, build the CLI locally, and invoke
 privileges, services or network ports are needed. Use a private disposable directory
 as the initial root; write access is opt-in. Deletion is permanent.
 
-The Dioxus app is unverified source, not an installable verified GUI release. Windows
+The Dioxus app compiled natively on Linux/Windows but is runtime-unverified and
+security-gated, not an installable verified GUI release. Windows
 and Android do not yet have functional native filesystem providers. Packaging and
 clean install/uninstall verification belong to the production-quality milestone.
 

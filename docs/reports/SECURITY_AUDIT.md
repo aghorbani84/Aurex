@@ -109,3 +109,10 @@ before changing policy or shipping a GUI/native package. No invented copyright o
 substitute license text was added, no broad license allow-list expansion was used,
 and the original project MIT LICENSE is unchanged. The dependency-free CLI candidate
 does not contain this GUI graph. Strict desktop deny remains FAIL, honestly.
+
+Final implementation run [41346292703](https://github.com/aghorbani84/Aurex/actions/runs/41346292703)
+retains these gates. Both native GUI compile runs succeeded, but **compilation does
+not clear any advisory, native redistribution, runtime or platform-provider gate**.
+The CLI/core history was rescanned locally through source 9bf7405: seven commits,
+387,991 bytes, Gitleaks exit 0/no leaks. Later documentation-only scans remain scoped
+observations, not proof that no secret exists.

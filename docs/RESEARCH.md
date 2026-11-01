@@ -12,12 +12,15 @@ filesystem engine. No proprietary UI/assets or third-party application code copi
 - Read workspace and `packages/dioxus`, `packages/desktop`, `packages/liveview`
   manifests; launch/context builder and signal/resource examples; upstream native CI.
 - Dioxus declared MSRV 1.83.0, MIT OR Apache-2.0. Pin app to =0.7.10 with the actual
-  macro/html/signal/hooks/desktop/launch features. Tokio =1.48.0 (MIT), matching the
+  macro/html/signal/hooks/desktop/launch features. Initially Tokio =1.48.0 (MIT), matching the
   tagged workspace's runtime line. Chosen stable compiler: 1.88.0.
 - GUI lock generated from official crates.io index records via GitHub API; resolver 3
   avoids known Rust-1.89-only uuid selection. All registry checksums are retained.
-- Crate tarballs/native libraries are unavailable here; the GUI has not been compiled,
-  and transitive dependencies still need an actual advisory/license audit.
+- Initially crate tarballs/native libraries were unavailable locally. Later GitHub
+  native Linux/Windows builds passed after actual compiler-error fixes. Actual strict
+  dependency audit exposed open GUI issues and drove a narrow Tokio update to
+  =1.51.6 (MIT, MSRV 1.71) for RUSTSEC-2026-0386; no broad dependency update/ignore.
+  GUI runtime and redistribution acceptance remain open. Reports record the runs.
 - A native renderer was chosen instead of introducing a browser-exposed filesystem
   server just to produce a screenshot. Official docs URL remains the tagged package's
   https://dioxuslabs.com/learn/0.7/getting_started (not reachable in this environment).

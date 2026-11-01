@@ -40,7 +40,7 @@ Process exit may interrupt jobs, so copy staging must be cleanup-safe independen
 
 The dependency-free executor and manually implemented `std::error::Error` are a
 bootstrapping decision for the restricted environment, not a claim that the full
-requested Tokio/Serde/thiserror/tracing stack is complete. Tokio 1.48.0 supplies
+requested Tokio/Serde/thiserror/tracing stack is complete. Tokio 1.51.6 supplies
 GUI timers; a future journal/config slice should introduce audited serialization,
 structured tracing and storage only alongside actual persistence requirements.
 

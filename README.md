@@ -12,9 +12,10 @@ folders, and bounded UTF-8 previews. Read-only is the default.
 
 A **Dioxus 0.7.10 desktop implementation** connects these same providers to dual panes,
 tabs, selection, operation confirmations, cancellation, activity, and text previews.
-Its compilation and runtime are **not verified in this sandbox**: crates.io downloads
-and native WebView development packages are unavailable. Do not treat UI source or
-lockfile resolution as evidence of a working graphical application.
+Native **Linux and Windows compilation passed on GitHub**, after hosted compiler
+errors were fixed. GUI runtime/display/shutdown acceptance is still **NOT TESTED**;
+strict GUI dependency/license policy still fails. Local crate/native downloads are
+restricted. Compilation is not evidence of a supported graphical application.
 
 Windows and Android filesystem providers, GUI installers, archives, remote connections,
 plugins, APK tools, persistence and recursive operations are **not implemented**.
@@ -28,12 +29,12 @@ cargo test --workspace --locked
 cargo build --release --locked
 
 # Grant only a disposable directory initially. All entry paths are root-relative.
-mkdir -p ./aurex-lab
-printf 'Hello, AUREX\n' > ./aurex-lab/example.txt
-cargo run --locked -p aurex-cli -- ./aurex-lab list
-cargo run --locked -p aurex-cli -- ./aurex-lab cat example.txt
-cargo run --locked -p aurex-cli -- ./aurex-lab --write mkdir copies
-cargo run --locked -p aurex-cli -- ./aurex-lab --write copy example.txt copies/example.txt
+lab="$(mktemp -d -t aurex-lab.XXXXXXXX)" || exit 1
+printf 'Hello, AUREX\n' > "$lab/example.txt"
+cargo run --locked -p aurex-cli -- "$lab" list
+cargo run --locked -p aurex-cli -- "$lab" cat example.txt
+cargo run --locked -p aurex-cli -- "$lab" --write mkdir copies
+cargo run --locked -p aurex-cli -- "$lab" --write copy example.txt copies/example.txt
 ```
 
 `cargo run -p aurex-cli -- --help` lists commands. Deletion additionally requires
@@ -47,8 +48,10 @@ fail without destroying the source. Never start testing against system directori
 ```sh
 scripts/check.sh
 python3 scripts/benchmark.py   # after the release build; private temporary fixtures
-# Unverified GUI build, on a host with the documented native dependencies:
-cargo run --manifest-path apps/aurex-app/Cargo.toml --locked -- ./aurex-lab
+# GUI runtime experiment only; known security gates remain open.
+# Use a private empty root on a host with the documented native dependencies:
+lab="$(mktemp -d -t aurex-gui-lab.XXXXXXXX)" || exit 1
+cargo run --manifest-path apps/aurex-app/Cargo.toml --locked -- "$lab"
 ```
 
 The small root workspace is dependency-free and builds offline once Rust is installed.

@@ -17,7 +17,7 @@ Local run: 2026-11-01, Linux x86-64, Rust 1.88.0, kernel 6.1.158 sandbox.
 | CLI smoke benchmark | Executed | `docs/PERFORMANCE.md`; not a release performance threshold |
 | Dioxus dependency resolution | PASS | Cargo-generated Rust-compatible GUI Cargo.lock |
 | Dioxus local compilation/runtime/UI tests | BLOCKED | Unavailable crate downloads/native display |
-| Dioxus hosted native compilation | FAIL, fixes under verification | Actual Linux/Windows runs exposed ambiguous Location/Signal field invocation errors |
+| Dioxus hosted native compilation | PASS Linux/Windows | Source 9bf7405; actual hosted type/ownership errors fixed; GUI runtime NOT TESTED |
 | Native Windows core tests/CLI help | PASS on GitHub | Actual MSVC/core jobs; not filesystem provider/runtime support |
 | Android SAF/runtime/build | NOT RUN | No provider, SDK/NDK/emulator or package workflow |
 | Workflow scans | PASS locally | actionlint 1.7.12, zizmor 1.31.1 auditor, YAML/project policy |

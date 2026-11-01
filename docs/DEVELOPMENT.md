@@ -6,7 +6,7 @@
 - `crates/aurex-tasks`: bounded executor, real Future, cancellation and progress.
 - `crates/aurex-fs`: async provider API and Linux x86-64 descriptor-relative backend.
 - `apps/aurex-cli`: tested command-line vertical slice with native arguments.
-- `apps/aurex-app`: separate Dioxus native desktop source/lockfile/assets; unverified.
+- `apps/aurex-app`: separate Dioxus native desktop source/lockfile/assets; native compilation verified, runtime not accepted.
 - `scripts/check.sh`: reproducible core checks; `benchmark.py`: private fixtures.
 
 Run `scripts/check.sh` from the repository root. It does not compile the GUI; run its
@@ -36,5 +36,7 @@ handling and regression tests. SQLite is not justified until that slice exists.
 Use exclusive temporary fixture roots. Reuse no existing data. Keep regression tests
 platform-gated and record skipped/blocked native cases honestly. Benchmarks include
 process overhead and OS caches; never extrapolate them to UI or production speed.
-See TEST_MATRIX.md and PERFORMANCE.md. CI definitions have not been run in GitHub
-in this session; no remote checks, releases or installer artifacts were published.
+See TEST_MATRIX.md and PERFORMANCE.md. Actual GitHub core/native Linux/Windows
+builds and CLI artifact/runtime checks passed. Strict GUI deny still fails; no GUI
+runtime, release or installer acceptance is claimed. Executed run/artifact links and
+source revisions are in reports/AUREX_ENGINEERING_REPORT.md.
