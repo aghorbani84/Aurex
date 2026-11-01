@@ -16,13 +16,13 @@ def escape(text):
 
 def main():
     command = ["cargo", "build", "--manifest-path", "apps/aurex-app/Cargo.toml", "--release", "--locked",
-               "--message-format=json-render-diagnostics"]
+               "--message-format=json"]
     errors, tail = [], collections.deque(maxlen=60)
     github = os.environ.get("GITHUB_ACTIONS") == "true"
     stop = "desktop-" + uuid.uuid4().hex
     if github:
         print(f"::stop-commands::{stop}", flush=True)
-    with subprocess.Popen(command, cwd=ROOT, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT) as process:
+    with subprocess.Popen(command, cwd=ROOT, text=True, encoding="utf-8", errors="replace", stdout=subprocess.PIPE, stderr=subprocess.STDOUT) as process:
         while True:
             line = process.stdout.readline(1_048_577)
             if not line:
@@ -34,6 +34,8 @@ def main():
             try:
                 record = json.loads(line)
             except json.JSONDecodeError:
+                record = {}
+            if not isinstance(record, dict):
                 record = {}
             if record.get("reason") == "compiler-message":
                 message = record["message"]

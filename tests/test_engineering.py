@@ -1,6 +1,8 @@
 """Real artifact regression fixtures; never extract or execute untrusted archive members."""
 import gzip
 import io
+import json
+import os
 import contextlib
 from types import SimpleNamespace
 import pathlib
@@ -8,8 +10,8 @@ import platform
 import tarfile
 import tempfile
 import unittest
-from unittest.mock import patch
-from scripts import package, platform_gate, audit_dependencies
+from unittest.mock import MagicMock, patch
+from scripts import package, platform_gate, audit_dependencies, build_desktop
 
 
 class ArchiveSafety(unittest.TestCase):
@@ -98,6 +100,40 @@ class AuditFailurePolicy(unittest.TestCase):
             results = audit_dependencies.collect(missing)
         self.assertEqual(len(results), 4)
         self.assertTrue(all(r["exit_code"] != 0 for r in results))
+
+
+class DesktopDiagnosticPolicy(unittest.TestCase):
+    def run_fixture(self, text, returncode):
+        with tempfile.TemporaryDirectory() as temp:
+            process = MagicMock()
+            process.stdout = io.StringIO(text)
+            process.wait.return_value = returncode
+            factory = MagicMock()
+            factory.__enter__.return_value = process
+            output = io.StringIO()
+            with patch.object(build_desktop, "ROOT", pathlib.Path(temp)), \
+                 patch.object(build_desktop.subprocess, "Popen", return_value=factory), \
+                 patch.dict(os.environ, {"GITHUB_ACTIONS": "true"}), contextlib.redirect_stdout(output):
+                with self.assertRaises(SystemExit) as exit:
+                    build_desktop.main()
+            report = json.loads((pathlib.Path(temp) / "artifacts/desktop/compilation.json").read_text())
+            self.assertEqual(exit.exception.code, 1)
+            self.assertFalse(report["runtime_verified"])
+            return process, report, output.getvalue()
+
+    def test_compiler_failure_and_json_scalar_are_not_lost_or_executed(self):
+        text = "true\n" + json.dumps({"reason": "compiler-message", "message": {
+            "rendered": "fixture %\n::warning::not a command", "level": "error"}}) + "\n"
+        process, report, output = self.run_fixture(text, 101)
+        self.assertEqual(report["exit_code"], 101)
+        self.assertIn("fixture %25%0A::warning::not a command", output)
+        self.assertIn("::stop-commands::desktop-", output)
+        process.kill.assert_not_called()
+
+    def test_oversized_diagnostic_fails_closed(self):
+        process, report, output = self.run_fixture("x" * 1_048_577, -9)
+        process.kill.assert_called_once()
+        self.assertIn("resource limit", report["errors"][0])
 
 
 if __name__ == "__main__":

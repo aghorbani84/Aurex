@@ -28,7 +28,8 @@ No rollback or retry deletes the published destination or the source.
 
 Python tests exercise actual CLI package launch, transfers/conflict refusal, byte-
 identical archive generation, checksums, traversal/symlinks/duplicates, PAX/decompression
-limits, and Android fail-closed reporting. All fixtures are private temporary roots.
+limits, Android fail-closed reporting, no-skip dependency-audit failure propagation,
+and compiler diagnostic parsing/escaping/size limits. All fixtures are private temporary roots.
 The verifier never extracts arbitrary names or executes untrusted archive input.
 
 Windows tests currently cover portable core/executor/navigation and CLI help, not a

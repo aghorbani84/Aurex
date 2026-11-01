@@ -45,7 +45,7 @@ def collect(runner=None):
         if os.environ.get("GITHUB_ACTIONS") == "true":
             print(f"::{stop}::", flush=True)
             if code:
-                excerpt = (name + ": " + "\n".join(summary)[:20000] + "\n" + output[-3000:]).replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
+                excerpt = (name + ": " + "\n".join(summary)[:16000] + "\nFIRST DIAGNOSTIC CONTEXT:\n" + output[:6000] + "\nLAST DIAGNOSTIC CONTEXT:\n" + output[-3000:]).replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
                 print(f"::error title=Dependency audit failure::{excerpt}", flush=True)
         results.append({"check": name, "command": command, "exit_code": code, "finding_summary": summary[:200], "diagnostic_tail": output[-16000:]})
     return results

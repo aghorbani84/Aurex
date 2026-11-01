@@ -34,3 +34,7 @@ change protected environments/settings. Official publication requires separate
 explicit authorization and native GUI/platform runtime, dependency/license/security
 and signing acceptance. Windows GUI builds are compile/link evidence only; Android
 readiness is a deliberate failing gate until a real mobile app + SAF exists.
+
+The archive helper always rebuilds locked sources for the explicit advertised
+`x86_64-unknown-linux-gnu` target before stamping source/toolchain metadata. It
+never labels an arbitrary stale `target/release` executable as the current commit.

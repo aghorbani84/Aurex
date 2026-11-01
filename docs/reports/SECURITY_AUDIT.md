@@ -12,7 +12,7 @@ certification or assertion of absence of vulnerabilities**.
 | AX-05 | P1 crafted package PAX header/decompression could consume memory before ordinary member checks | FIXED in new verifier: bounded expansion to a private stream, bounded read/seek wrapper before tar parsing, name/type/count/size/duplicate/hash validation; malicious fixtures pass |
 | AX-06 | P1 native Windows/Android and GUI runtime unverified | OPEN: no functional provider/SDK; fail-closed Android report; no falsely usable platform installer |
 | AX-07 | P1 hostile concurrent rename/delete identity replacement; mount/hardlink boundary | OPEN: root is capability scope, not an OS sandbox; no immutable identity-conditional delete; avoid shared hostile writable roots |
-| AX-08 | P2 dependency vulnerabilities/native redistribution obligations not fully audited | OPEN pending actual cargo-audit/deny jobs; no exception list or success-by-ignore |
+| AX-08 | P2 dependency vulnerabilities/native redistribution obligations not fully audited | CONFIRMED: hosted desktop deny fails on unsound/unmaintained dependencies and one license; Tokio fixed narrowly, other blockers retained without exceptions |
 
 ## Reviewed boundaries
 
@@ -65,3 +65,24 @@ The lock diff updates only those two packages; this is not a mass dependency upg
 The remaining obsolete transitive GUI ecosystem is a release blocker pending full
 annotated rerun. The root 0.21.2 audit failure disappeared with verified 0.22.2;
 the original inaccessible diagnostic was never established, so no causal claim is made.
+
+### Verified post-Tokio audit
+
+Run [41344877621](https://github.com/aghorbani84/Aurex/actions/runs/41344877621)
+no longer reports RUSTSEC-2026-0386 after the targeted Tokio fix. Core audit/deny and
+desktop cargo-audit pass, but **desktop cargo-deny still FAILS**:
+
+- fxhash: RUSTSEC-2025-0057 (unmaintained, no safe upgrade).
+- glib 0.18: RUSTSEC-2024-0429 (`VariantStrIter` unsound; fixed >=0.20,
+  incompatible with the current GTK3/WebKit binding stack).
+- paste: RUSTSEC-2024-0436 (unmaintained).
+- proc-macro-error: RUSTSEC-2024-0370 (unmaintained).
+- rand 0.7.3: RUSTSEC-2026-0097 (unsound; current phf_generator 0.8's ^0.7
+  constraint cannot accept the fixed >=0.8.6 release without upstream changes).
+- One rejected license expression; full first-diagnostic context is added to the
+  next bounded annotation rather than guessing which license/crate failed.
+
+These are **unresolved release gates**, not hidden warnings. No exception, blanket
+allowlist expansion, GTK platform exclusion or architecture rewrite was used to make
+checks green. A maintained upstream native dependency path requires its own reviewed
+migration and runtime acceptance; native GUI distributions remain disabled.

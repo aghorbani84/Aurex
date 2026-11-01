@@ -1,5 +1,8 @@
 use crate::AppContext;
-use aurex_core::{navigation::PaneState, *};
+use aurex_core::{
+    navigation::PaneState, Capability, ConflictPolicy, EntryKind, ListOptions, Location, Operation,
+    OperationKind,
+};
 use aurex_fs::FilesystemProvider;
 use aurex_tasks::{Cancellation, Progress};
 use dioxus::prelude::*;
@@ -151,7 +154,7 @@ pub fn App() -> Element {
                     div { class: "workspace-title",
                         div { h1 { "A place for everything." } p { "Two workspaces. One clear view." } }
                         div { class: "view-actions",
-                            button { disabled: busy(), onclick: move |_| { let l = explorer.left().clone(); let r = explorer.right().clone(); explorer.left.set(r); explorer.right.set(l); }, title: "Exchange both workspaces", "⇄ Exchange" }
+                            button { disabled: busy(), onclick: move |_| { let l = (explorer.left)().clone(); let r = (explorer.right)().clone(); explorer.left.set(r); explorer.right.set(l); }, title: "Exchange both workspaces", "⇄ Exchange" }
                             button { disabled: busy(), onclick: move |_| { let path = explorer.pane().read().path(); explorer.other().write().navigate(path); }, title: "Set other pane to the active location", "⟳ Sync location" }
                         }
                     }
@@ -251,7 +254,7 @@ fn Pane(mut state: Signal<PaneState>, right_side: bool) -> Element {
     let page = listing.read().clone();
     let snapshot = state.read().clone();
     let current = snapshot.path();
-    let is_active = explorer.active() == right_side;
+    let is_active = (explorer.active)() == right_side;
     let title = if right_side {
         "RIGHT WORKSPACE"
     } else {
@@ -353,7 +356,7 @@ fn OperationDialog(kind: OperationKind) -> Element {
     let selections: Vec<_> = pane.read().selection.iter().cloned().collect();
     let source_dir = pane.read().path();
     let target_dir = explorer.other().read().path();
-    let input = explorer.input();
+    let input = (explorer.input)();
     let named = matches!(kind, OperationKind::Rename | OperationKind::CreateDirectory);
     let valid_name = !input.is_empty()
         && Path::new(&input).components().count() == 1
@@ -389,11 +392,11 @@ fn OperationDialog(kind: OperationKind) -> Element {
                         let provider = ctx.provider.clone();
                         let mut queue = Vec::new();
                         if kind == OperationKind::CreateDirectory {
-                            queue.push(Operation { kind, source: Location::local(source_dir.join(explorer.input())), destination: None, conflict: ConflictPolicy::Fail });
+                            queue.push(Operation { kind, source: Location::local(source_dir.join((explorer.input)())), destination: None, conflict: ConflictPolicy::Fail });
                         } else {
                             for path in &selections {
                                 let destination = match kind {
-                                    OperationKind::Rename => Some(Location::local(path.with_file_name(explorer.input()))),
+                                    OperationKind::Rename => Some(Location::local(path.with_file_name((explorer.input)()))),
                                     OperationKind::Copy | OperationKind::Move => path.file_name().map(|name| Location::local(target_dir.join(name))),
                                     _ => None,
                                 };
@@ -404,7 +407,7 @@ fn OperationDialog(kind: OperationKind) -> Element {
                         // Each batch owns a fresh cancellation token. Context's token is replaced for Cancel.
                         // Reset is safe because only one operation batch can be active.
                         explorer.cancel.set(Cancellation::default());
-                        let cancel = explorer.cancel(); let progress = explorer.progress();
+                        let cancel = (explorer.cancel)(); let progress = (explorer.progress)();
                         spawn(async move {
                             let mut completed = 0usize; let mut failed = 0usize;
                             for operation in queue {

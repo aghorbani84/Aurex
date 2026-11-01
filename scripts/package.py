@@ -65,9 +65,12 @@ def build(output, allow_dirty=False):
     if dirty and not allow_dirty:
         raise ValueError("refusing a dirty-tree candidate; use --allow-dirty only for labelled local verification")
     version = tomllib.loads((ROOT / "Cargo.toml").read_text())["workspace"]["package"]["version"]
-    binary = ROOT / "target" / "release" / "aurex-cli"
+    # Do not attach today's source commit/toolchain metadata to an arbitrary stale
+    # target/release file. Rebuild locked sources for the explicit advertised ABI.
+    run("cargo", "build", "--workspace", "--release", "--locked", "--target", TARGET)
+    binary = ROOT / "target" / TARGET / "release" / "aurex-cli"
     if not binary.is_file() or binary.is_symlink():
-        raise ValueError("build the release CLI first: cargo build --workspace --release --locked")
+        raise ValueError("locked target build did not produce the expected regular CLI executable")
     smoke(binary)
     linking = run("ldd", str(binary))
     if "not found" in linking:

@@ -23,7 +23,7 @@ Raw logs: ignored `artifacts/evidence/` (not secrets or generated data in Git).
 | Formatting | PASS | `cargo fmt --all --check` and separate GUI Rust formatting |
 | Clippy | PASS | `cargo clippy --workspace --all-targets --locked -- -D warnings`, exit 0 |
 | Rust tests | PASS | `cargo test --workspace --locked`: 37 (baseline 31 + 6 fault regressions) |
-| Engineering tests | PASS | `python3 -m unittest discover -s tests -v`: 8, `Ran 8 tests ... OK` |
+| Engineering tests | PASS | `python3 -m unittest discover -s tests -v`: 10, `Ran 10 tests ... OK` |
 | Workflow structure/type lint | PASS | actionlint v1.7.12 source build, exit 0; shellcheck/pyflakes not installed locally |
 | Workflow security | PASS, scoped | zizmor 1.31.1 `--offline --persona auditor`, exit 0, `No findings to report` |
 | YAML/project policy | PASS | `validate_workflows.py`: six workflows, pins/permissions/credentials/timeouts/contexts checked |
