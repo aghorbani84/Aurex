@@ -79,10 +79,33 @@ desktop cargo-audit pass, but **desktop cargo-deny still FAILS**:
 - proc-macro-error: RUSTSEC-2024-0370 (unmaintained).
 - rand 0.7.3: RUSTSEC-2026-0097 (unsound; current phf_generator 0.8's ^0.7
   constraint cannot accept the fixed >=0.8.6 release without upstream changes).
-- One rejected license expression; full first-diagnostic context is added to the
-  next bounded annotation rather than guessing which license/crate failed.
+- libfuzzer-sys 0.4.13, via rav1e → ravif → image → dioxus-desktop:
+  declared `(MIT OR Apache-2.0) AND NCSA`; NCSA is not approved by the current policy.
+  This is a confirmed **policy rejection**, not a claim that NCSA is non-free or
+  inherently incompatible. See the specific license review below.
 
 These are **unresolved release gates**, not hidden warnings. No exception, blanket
 allowlist expansion, GTK platform exclusion or architecture rewrite was used to make
 checks green. A maintained upstream native dependency path requires its own reviewed
 migration and runtime acceptance; native GUI distributions remain disabled.
+
+### License policy diagnosis, not invented redistribution clearance
+
+[Run 41345497976](https://github.com/aghorbani84/Aurex/actions/runs/41345497976)
+confirmed all five remaining advisories and identified the license above. Official
+libfuzzer-sys tag 0.4.13 resolves to commit
+`719e4efb9b8857ebaa782ae59376c8cbb78fed0f`; its
+[Cargo.toml](https://github.com/rust-fuzz/libfuzzer/blob/719e4efb9b8857ebaa782ae59376c8cbb78fed0f/Cargo.toml)
+confirms the exact expression. Root license files are MIT and Apache; bundled
+FuzzerDefs.h/FuzzerDriver.cpp headers also name Apache-2.0 WITH LLVM-exception.
+That does not authorize us to discard the manifest's additional NCSA obligation.
+
+The [SPDX NCSA text](https://github.com/spdx/license-list-data/blob/main/json/details/NCSA.json)
+was read (content blob `2193967d9933635911e10b4518b95da2bac48b44`): permissive,
+requires source notice retention, binary redistribution of copyright/conditions/
+disclaimer in accompanying materials, and no endorsement. It is OSI approved.
+A complete bundled-code/notice inventory and scope determination are still required
+before changing policy or shipping a GUI/native package. No invented copyright or
+substitute license text was added, no broad license allow-list expansion was used,
+and the original project MIT LICENSE is unchanged. The dependency-free CLI candidate
+does not contain this GUI graph. Strict desktop deny remains FAIL, honestly.

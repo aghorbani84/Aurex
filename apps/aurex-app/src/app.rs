@@ -265,6 +265,15 @@ fn Pane(mut state: Signal<PaneState>, right_side: bool) -> Element {
         .and_then(|p| p.as_ref().ok())
         .map(|p| p.entries.clone())
         .unwrap_or_default();
+    // RSX may evaluate dynamic children before attributes. Give the selection
+    // handler its own path snapshot instead of cloning an already-consumed list.
+    let visible_paths: Vec<PathBuf> = entries
+        .iter()
+        .filter_map(|entry| match &entry.location {
+            Location::Local(path) => Some(path.clone()),
+            _ => None,
+        })
+        .collect();
     rsx! {
         section { class: if is_active { "pane active" } else { "pane" }, onfocusin: move |_| explorer.active.set(right_side), onclick: move |_| explorer.active.set(right_side),
             div { class: "pane-title", span { class: "pane-dot" } "{title}" span { class: "pane-path-label", "{label(&current)}" } }
@@ -294,9 +303,7 @@ fn Pane(mut state: Signal<PaneState>, right_side: bool) -> Element {
                 label { title: "Show hidden files", input { r#type: "checkbox", checked: snapshot.show_hidden, onchange: move |e| { let mut s = state.write(); s.show_hidden = e.checked(); s.offset = 0; s.selection.clear(); } } "Hidden" }
             }
             div { class: "list-head",
-                button { "aria-label": "Select all visible items", onclick: {
-                    let visible = entries.clone(); move |_| { for entry in &visible { if let Location::Local(path) = &entry.location { state.write().selection.insert(path.clone()); } } }
-                }, "+" }
+                button { "aria-label": "Select all visible items", onclick: move |_| { state.write().selection.extend(visible_paths.iter().cloned()); }, "+" }
                 button { onclick: move |_| { let descending = state.read().descending; state.write().descending = !descending; }, "Name ↕" }
                 span { "Size" } span { "Type" }
             }

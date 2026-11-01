@@ -7,7 +7,7 @@ Local run: 2026-11-01, Linux x86-64, Rust 1.88.0, kernel 6.1.158 sandbox.
 | CLI integration | PASS (4) | Real subprocess lifecycle, grants/confirm, conflict/traversal, literal crafted names |
 | Core navigation | PASS (4) | Branching history, independent tabs, reset selection, bounds |
 | Copy fault injection | PASS (6) | Midstream/precommit/postcommit cancellation, source mutation, injected ENOSPC/file-sync and directory-sync partial commit |
-| Python engineering | PASS (10) | Actual package launch/reproducibility, malicious package fixtures and Android fail-closed report |
+| Python engineering | PASS (10) | Actual package lifecycle/reproducibility; malicious archive, Android, audit and bounded compiler diagnostic fixtures |
 | Task executor | PASS (4) | Real Future wake, panic isolation, deterministic queue backpressure, shared progress/cancel |
 | Filesystem provider | PASS (19) | See test names in `crates/aurex-fs/tests/provider.rs` |
 | Root formatting | PASS | `cargo fmt --all --check` |
@@ -16,11 +16,12 @@ Local run: 2026-11-01, Linux x86-64, Rust 1.88.0, kernel 6.1.158 sandbox.
 | Root release build | PASS | `cargo build --workspace --release --locked` |
 | CLI smoke benchmark | Executed | `docs/PERFORMANCE.md`; not a release performance threshold |
 | Dioxus dependency resolution | PASS | Cargo-generated Rust-compatible GUI Cargo.lock |
-| Dioxus compilation/runtime/UI tests | BLOCKED | Unavailable crate downloads and native WebView toolchain/display |
-| Native Windows tests | NOT RUN | CI definition exists, not run in this session |
+| Dioxus local compilation/runtime/UI tests | BLOCKED | Unavailable crate downloads/native display |
+| Dioxus hosted native compilation | FAIL, fixes under verification | Actual Linux/Windows runs exposed ambiguous Location/Signal field invocation errors |
+| Native Windows core tests/CLI help | PASS on GitHub | Actual MSVC/core jobs; not filesystem provider/runtime support |
 | Android SAF/runtime/build | NOT RUN | No provider, SDK/NDK/emulator or package workflow |
 | Workflow scans | PASS locally | actionlint 1.7.12, zizmor 1.31.1 auditor, YAML/project policy |
-| Dependency advisory/license audit | PENDING remote scan | No blanket advisory exceptions; transitive license review pending |
+| Dependency advisory/license audit | FAIL on GitHub | Core audit/deny and GUI audit pass; strict GUI deny catches unsound/unmaintained crates and one license rejection; no ignores |
 
 ## Filesystem coverage
 
@@ -46,5 +47,6 @@ removed by fixture owners. No tests touch existing user directories or mounts.
 - Windows UNC/ACL/locking/long/case paths; Android grant/revocation/provider cases.
 - Archive/plugin/credential tests belong to future implemented modules, not fake tests.
 
-The 37-Rust + 10-Python test total excludes doc-test suites with zero cases. CI files are test
-**definitions**, not a statement that GitHub checks already passed.
+The 37-Rust + 10-Python test total excludes doc-test suites with zero cases. Local tests and hosted scopes differ (Linux filesystem tests are not run on Windows).
+[REPORT A](reports/AUREX_ENGINEERING_REPORT.md) links actual executed GitHub checks;
+workflow definitions alone are never evidence of a pass.

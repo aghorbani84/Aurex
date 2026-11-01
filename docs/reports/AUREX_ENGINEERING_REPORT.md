@@ -1,71 +1,130 @@
 # REPORT A — AUREX engineering upgrade
 
-Date: 2026-11-01. This is a **partial engineering upgrade**, not the commercial/cross-
-platform acceptance milestone. FAZORA is a separate execution (FAZORA_HANDOFF.md).
+Date: 2026-11-01. **Partial engineering upgrade, not production/cross-platform
+acceptance.** Draft [PR #1](https://github.com/aghorbani84/Aurex/pull/1) targets the
+discovered default branch `main` from `arena/c8d70e1e-aurex`.
+FAZORA remains a [separate execution](FAZORA_HANDOFF.md).
 
-## Baseline and work
+## Baseline, scope and changes
 
-BASELINE_2026-11-01.md records the inspected Git root, existing uncommitted foundation,
-31 passing tests, toolchain/workspace, missing packages/platforms and permission limits.
-Existing changes and MIT license were preserved; no reset/history rewrite/force push.
+[Baseline](BASELINE_2026-11-01.md): root `/home/user/Aurex`, initial commit
+`e437dd825563647d06cca80b6db3240e20eca44e`, existing uncommitted core/GUI foundation,
+31 passing Rust tests, separate Cargo workspaces, missing native packages/providers.
+Existing changes and original MIT LICENSE preserved; no reset/history rewrite,
+force push, release publication, signing/secrets or repository-setting changes.
 
-Security review: SECURITY_AUDIT.md. Added typed partial-commit errors and six production-
-path copy fault regressions; fixed checkout credential persistence; hardened new package
-verification against traversal, symlink/duplicate/checksum/PAX/decompression hazards.
-No unmeasured runtime optimization or universal safety/security certification is claimed.
+- Added typed partial-commit/durability errors retaining the committed destination
+  and OS cause: failed fsync after publication must not encourage blind retry.
+- Six production-copy fault regressions and exclusive mode-0700 test roots.
+- Real Linux CLI archive lifecycle tests, deterministic packaging, bounded malicious
+  archive validation, SHA-256, provenance, scoped SBOM and actual Rust notices.
+  Packaging rebuilds locked sources for the advertised target, not a stale executable.
+- Six independent least-privilege workflows, pinned official action SHAs, weekly
+  scanners/Dependabot, safe checkout/cache boundaries, fail-closed Android readiness.
+- Real hosted failures drove Node 24 action compatibility updates, all-graph audit
+  failure retention, bounded API-readable diagnostics and GUI type-error fixes.
+- Confirmed Tokio I/O-safety advisory fixed narrowly at 1.51.6; its required macros
+  package updated to 2.7.2. Remaining native GUI advisories/license rejection stay
+  visible and block release. See [security review](SECURITY_AUDIT.md).
 
-## Verification evidence (local)
+## Command verification (local)
 
-Raw logs: ignored `artifacts/evidence/` (not secrets or generated data in Git).
+Raw ignored logs: `artifacts/evidence/`. A passing local command is not a hosted run.
 
 | Check | Result | Actual command/evidence |
 |---|---|---|
-| Formatting | PASS | `cargo fmt --all --check` and separate GUI Rust formatting |
-| Clippy | PASS | `cargo clippy --workspace --all-targets --locked -- -D warnings`, exit 0 |
-| Rust tests | PASS | `cargo test --workspace --locked`: 37 (baseline 31 + 6 fault regressions) |
-| Engineering tests | PASS | `python3 -m unittest discover -s tests -v`: 10, `Ran 10 tests ... OK` |
-| Workflow structure/type lint | PASS | actionlint v1.7.12 source build, exit 0; shellcheck/pyflakes not installed locally |
-| Workflow security | PASS, scoped | zizmor 1.31.1 `--offline --persona auditor`, exit 0, `No findings to report` |
-| YAML/project policy | PASS | `validate_workflows.py`: six workflows, pins/permissions/credentials/timeouts/contexts checked |
-| Dependency advisory/license audit | BLOCKED locally | cargo-audit/deny unavailable under registry egress; remote jobs defined without advisory exceptions |
-| Linux CLI build/runtime | PASS | `cargo build --workspace --release --locked`; packaged binary fixture lifecycle before/after archiving |
-| Linux GUI build/runtime | BLOCKED locally | GUI offline cargo check exits 101: missing `tokio`; native WebView unavailable |
-| Windows native build/runtime | PENDING GitHub | Actual MSVC CLI and GUI build jobs; provider explicitly unimplemented; no installer falsely shipped |
-| Android APK/AAB | BLOCKED | readiness exits 2 with JSON; no mobile entrypoint/config/provider/SDK/NDK/JDK; no APK/AAB |
-| Reproducibility | PASS within stated scope | Two archives from the same binary/source metadata compare byte-for-byte equal |
-| GitHub execution | PENDING | PR/run URLs and actual remote status to be recorded after push; local YAML is not remote execution |
+| Formatting | PASS | `cargo fmt --all --check`; separate GUI workspace formatting |
+| Core Clippy | PASS | `cargo clippy --workspace --all-targets --locked -- -D warnings` |
+| Rust tests | PASS | `cargo test --workspace --locked`: 37 (31 + six fault regressions) |
+| Engineering tests | PASS | `python3 -m unittest discover -s tests -v`: 10; real CLI artifacts and crafted archive/audit/compiler failures |
+| Workflow structure | PASS, scoped | actionlint 1.7.12 official-source build; local shellcheck/pyflakes unavailable |
+| Workflow security | PASS, scoped | zizmor 1.31.1 `--offline --persona auditor`: no findings |
+| YAML/project policy | PASS | `validate_workflows.py`: six workflows |
+| History secrets | PASS, scoped | actual Gitleaks 8.30.1 history scan: exit 0/no leaks, not proof of absence |
+| Dependency tools | BLOCKED locally | Registry egress prevents local audit/deny installation; actual hosted results below |
+| Linux CLI build/runtime | PASS | Explicit `--target x86_64-unknown-linux-gnu --release --locked`; fixture operations before/after packaging |
+| Reproducibility | PASS, scoped | Two archives from identical source/binary metadata compare byte-for-byte; not cross-host reproducible compilation |
+| Local GUI | BLOCKED | Missing crate tarballs/GTK/WebKit/display; local offline check exit 101 |
+| Android readiness | BLOCKED, expected exit 2 | JSON reports absent mobile/provider/packaging prerequisites; not an APK build |
+
+## Actual GitHub executions
+
+These URLs are real runs, not definitions. Later documentation-only revisions do
+not retroactively change the tested source revision. Superseded cancellations are
+not compilation success or failure evidence.
+
+| Run | Observed result and scope |
+|---|---|
+| [CI 41343845994](https://github.com/aghorbani84/Aurex/actions/runs/41343845994) | SUCCESS: native Ubuntu/Windows portable core checks |
+| [CI 41344252459](https://github.com/aghorbani84/Aurex/actions/runs/41344252459) | SUCCESS with verified Node 24 action pins |
+| [Linux 41344877670](https://github.com/aghorbani84/Aurex/actions/runs/41344877670) | CLI candidate SUCCESS/uploaded; GUI FAIL: hosted Rust diagnostics exposed E0659/E0599 |
+| [Windows 41344877648](https://github.com/aghorbani84/Aurex/actions/runs/41344877648) | MSVC CLI compile/help PASS; GUI FAIL on the same source type errors; provider still unimplemented |
+| [Security 41343845904](https://github.com/aghorbani84/Aurex/actions/runs/41343845904) | Scanner job PASS; old audit tool failed early, hiding subsequent graphs; original log inaccessible |
+| [Security 41344252493](https://github.com/aghorbani84/Aurex/actions/runs/41344252493) | All four graphs executed; core audit/deny and desktop audit PASS, desktop deny FAIL including Tokio I/O safety |
+| [Security 41344877621](https://github.com/aghorbani84/Aurex/actions/runs/41344877621) | Tokio finding gone after patch; desktop deny still FAIL on five other advisories and a license requirement; no ignores |
+| [CI 41345497993](https://github.com/aghorbani84/Aurex/actions/runs/41345497993) | SUCCESS: native Linux/Windows core checks; Linux runs 37 Rust + 10 Python cases (Windows portable subset, Linux packaging case skipped) |
+| [Linux 41345497988](https://github.com/aghorbani84/Aurex/actions/runs/41345497988) | CLI fresh-target candidate PASS; GUI FAIL on one RSX list ownership error, now fixed with a separate selection-path snapshot |
+| [Windows 41345498006](https://github.com/aghorbani84/Aurex/actions/runs/41345498006) | GUI ownership-fix verification remains separate; no Windows filesystem acceptance |
+| [Security 41345497976](https://github.com/aghorbani84/Aurex/actions/runs/41345497976) | FAIL: five advisories plus libfuzzer-sys 0.4.13 NCSA policy rejection identified; see security review |
+
+GUI type fixes disambiguate the core `Location` from Dioxus's prelude and call
+struct-held Signals with `(explorer.field)()` rather than nonexistent methods.
+A subsequent hosted E0382 identified RSX evaluation consuming the entries vector
+before its selection callback cloned it; the callback now owns a distinct path-only
+snapshot created before RSX construction. That follow-up still needs hosted confirmation.
+The sandbox cannot reach GitHub's `results-receiver.actions.githubusercontent.com`
+log-storage host. The new harness safely disables command interpretation while
+printing tool output, then emits bounded escaped compiler/finding annotations
+accessible through the GitHub API. Failures remain nonzero; no log-access limitation
+is used to claim the underlying build passed. Full native GUI Clippy/runtime/UI
+acceptance is not established by the core job or a build-only job.
 
 ## Artifacts
 
-`artifacts/packages/aurex-cli-0.1.0-x86_64-unknown-linux-gnu.tar.gz`, adjacent `.sha256`,
-`build-metadata.json`, `sbom.cdx.json`. Unsigned **CLI engineering candidate** only.
-Per-member SHA-256 manifest, source/compiler/dirty metadata, exact installed Rust
-notices and OS native dependency list included. Local candidates honestly record a
-dirty working tree until committed. No GUI runtime, installer, code signing, APK/AAB
-or official release is claimed. CI candidates are separate from GitHub Releases.
-See RELEASES.md for validation/provenance/limitations. Generated files are ignored.
+Actual [initial hosted CLI artifact](https://github.com/aghorbani84/Aurex/actions/runs/41343845985/artifacts/13098566301)
+was uploaded after real compilation and package runtime tests. It belongs to the
+initial PR merge revision, not necessarily the latest branch head. Current CLI runs
+also upload independently checksummed candidates; use each run's provenance.
 
-## Automation and docs
+A newer [fresh-target CLI artifact](https://github.com/aghorbani84/Aurex/actions/runs/41345497988/artifacts/13098668734)
+was uploaded from PR merge revision `d653eb60fa6d018f5631597077bb29717648a940`
+(branch head `656574c745aba7926505a8301203819e59db6052`), 665,413 bytes,
+GitHub artifact-container digest
+`sha256:b240455c4d49d0e8fed11c8d788eefced4bfb4f25829dd41395d078c99b3553d`.
+This is not the inner tar.gz checksum; that package has its own generated sidecar.
 
-Independent CI, Linux, Windows, Android readiness, weekly security and manual
-candidate workflows; weekly Cargo/Actions Dependabot; cargo-deny policy without
-advisory ignores. Read-only permissions, immutable action pins, no checkout token
-persistence, no untrusted shell context interpolation, trusted-branch-only cache
-writes, bounded durations, no signing/publishing secrets or permissions.
+Local ignored `artifacts/packages/aurex-cli-0.1.0-x86_64-unknown-linux-gnu.tar.gz`
+has adjacent `.sha256`, `build-metadata.json` and `sbom.cdx.json`. Contents include
+per-member hashes, source/toolchain/dirty metadata, original LICENSE, actual Rust
+notices and dynamic native dependency inventory. Candidates are unsigned CLI-only,
+not GUI/installers/static-all-distribution binaries or official Releases. The scoped
+SBOM covers root Cargo.lock, not complete native composition/redistribution clearance.
+See [release guide](../RELEASES.md). No Windows provider package or APK/AAB is shipped.
 
-README, status, test matrix, operation/security guides updated; new testing, CI/CD,
-artifact, baseline/audit and independent execution reports. Default branch discovered
-as main. No FAZORA workspaces/runtime/identity/engines are merged into this project.
+## Measured performance, no optimization claim
 
-## Remaining acceptance blockers
+Actual original 11-trial Linux warm-cache release measurements:
 
-- Compile and actually run/test the Dioxus GUI, including keyboard/focus/shutdown.
-- Implement and test Windows native provider and real Android SAF/mobile packaging.
-- Run dependency/security/license jobs on a normally connected native runner and fix
-  actual findings; no broad ignore to force green checks.
-- Actual filesystem disk-full/short-write/kernel fsync/hostile races beyond injected
-  tests; permissions/grant revocation and OS-specific runtime acceptance.
-- Complete dependency/native redistribution review; immutable/reproducible OS images,
-  signed packages, installation tests and approved protected publication pipeline.
-- Aarch64 Linux is not enabled; no flag-constant/native validation pretends otherwise.
-- FAZORA native playback/FFI/license/build work belongs in its separate checkout.
+| CLI workload | p50 ms | p95/p99 ms |
+|---|---:|---:|
+| Help/process startup | 1.479 | 1.936 |
+| 1,000-entry listing | 7.100 | 7.457 |
+| 8,388,606-byte copy + full verification/fsync | 19.157 | 21.608 |
+
+With 11 trials both tail columns select the maximum and are not robust estimates.
+No new optimization, before/after improvement, GUI latency, Windows/Android throughput,
+battery or memory benchmark is claimed. [Method/gaps](../PERFORMANCE.md).
+
+## Acceptance blockers / independent work
+
+- Resolve remaining native GUI security/license findings via maintained compatible
+  upstream dependencies, with migration/API/native-runtime evidence, not ignores.
+- Verify hosted fixes, run the GUI on a real display and test focus/keyboard/touch,
+  active-job shutdown, accessibility, native dependencies and full GUI lint.
+- Implement/test real Windows provider and Android SAF/mobile/native package path.
+- Real disk-full/short-write/kernel fsync, hostile identity replacement/mount/hardlink
+  boundaries and grant revocation exceed injected-test evidence. Root is not a sandbox.
+- Complete native redistribution/notices review, install/uninstall tests, protected
+  authorized signing/publication, immutable images and broader filesystem performance.
+- Aarch64 Linux unimplemented; FAZORA playback/FFI/engine licensing belongs to its
+  separate checkout. No workspaces, pipelines or package identities were merged.
