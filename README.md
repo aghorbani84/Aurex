@@ -1,2 +1,79 @@
-# Aurex
-AUREX File Manager — a powerful, cross-platform file management system built with Rust and Dioxus, targeting Linux, Windows, and Android.
+# AUREX
+
+A Rust file manager under active development, targeting Linux, Windows and Android.
+**This is an early engineering foundation, not a production or cross-platform release.**
+
+## What can I run today?
+
+The **Linux x86-64 CLI and filesystem core are built and tested**. They provide real
+root-scoped browsing, filename filtering, metadata, verified regular-file copying,
+same-filesystem moves, rename, folder creation, permanent deletion of files/empty
+folders, and bounded UTF-8 previews. Read-only is the default.
+
+A **Dioxus 0.7.10 desktop implementation** connects these same providers to dual panes,
+tabs, selection, operation confirmations, cancellation, activity, and text previews.
+Its compilation and runtime are **not verified in this sandbox**: crates.io downloads
+and native WebView development packages are unavailable. Do not treat UI source or
+lockfile resolution as evidence of a working graphical application.
+
+Windows and Android filesystem providers, GUI installers, archives, remote connections,
+plugins, APK tools, persistence and recursive operations are **not implemented**.
+
+## Quick start: tested Linux core
+
+Install stable Rust **1.88.0** using your normal user-local Rust installation, then:
+
+```sh
+cargo test --workspace --locked
+cargo build --release --locked
+
+# Grant only a disposable directory initially. All entry paths are root-relative.
+mkdir -p ./aurex-lab
+printf 'Hello, AUREX\n' > ./aurex-lab/example.txt
+cargo run --locked -p aurex-cli -- ./aurex-lab list
+cargo run --locked -p aurex-cli -- ./aurex-lab cat example.txt
+cargo run --locked -p aurex-cli -- ./aurex-lab --write mkdir copies
+cargo run --locked -p aurex-cli -- ./aurex-lab --write copy example.txt copies/example.txt
+```
+
+`cargo run -p aurex-cli -- --help` lists commands. Deletion additionally requires
+`--confirm` and is permanent. Existing destinations are never silently overwritten.
+Linux browsing requires procfs; copying additionally requires `O_TMPFILE` and
+hardlink publication support on the destination filesystem. Unsupported filesystems
+fail without destroying the source. Never start testing against system directories.
+
+## Development
+
+```sh
+scripts/check.sh
+python3 scripts/benchmark.py   # after the release build; private temporary fixtures
+# Unverified GUI build, on a host with the documented native dependencies:
+cargo run --manifest-path apps/aurex-app/Cargo.toml --locked -- ./aurex-lab
+```
+
+The small root workspace is dependency-free and builds offline once Rust is installed.
+The renderer is an explicitly separate workspace with its own committed lockfile,
+so GUI dependencies cannot block filesystem regression tests. There is no web
+filesystem server, externally exposed API, telemetry, or automatic file execution.
+
+## Documentation
+
+- [Current status](AUREX_STATUS.md) · [Implementation plan](docs/IMPLEMENTATION_PLAN.md)
+- [Architecture](ARCHITECTURE.md) · [Feature availability](FEATURES.md)
+- [Security model](SECURITY.md) · [Operation guarantees](docs/FILE_OPERATIONS.md)
+- [Build instructions](docs/BUILDING.md) · [Development](docs/DEVELOPMENT.md)
+- [Platform matrix](docs/PLATFORM_SUPPORT.md) · [Tests](docs/TEST_MATRIX.md)
+- [Research and toolchain verification](docs/RESEARCH.md)
+- [CI/security policy](docs/CI_CD.md) · [Testing](docs/TESTING.md)
+- [Engineering artifacts](docs/RELEASES.md) · [Upgrade report](docs/reports/AUREX_ENGINEERING_REPORT.md)
+
+The engineering upgrade adds typed partial-commit errors, deterministic copy fault
+regressions, workflow scanners/weekly dependency policy, and a **validated unsigned
+Linux CLI archive** with SHA-256, metadata, scoped SBOM and Rust notices. It is not a
+GUI/Windows/Android production release. Build it with `python3 scripts/package.py`
+after the release build from a clean checkout (see the artifact guide).
+
+## License
+
+MIT; see the existing [LICENSE](LICENSE). Reference applications are studied for
+workflows only; their source, assets and branding are not incorporated.

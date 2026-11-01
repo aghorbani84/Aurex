@@ -1,0 +1,18 @@
+[workspace]
+resolver = "2"
+members = ["crates/aurex-core", "crates/aurex-tasks", "crates/aurex-fs", "apps/aurex-cli"]
+# The UI has its own lockfile: core can be built offline without renderer dependencies.
+exclude = ["apps/aurex-app"]
+default-members = ["apps/aurex-cli"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.88"
+license = "MIT"
+
+[workspace.lints.rust]
+unsafe_op_in_unsafe_fn = "deny"
+
+[workspace.lints.clippy]
+undocumented_unsafe_blocks = "deny"
