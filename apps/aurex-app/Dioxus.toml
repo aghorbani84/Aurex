@@ -1,0 +1,12 @@
+[application]
+name = "AUREX"
+
+[bundle]
+identifier = "io.github.aghorbani84.aurex"
+short_description = "Root-scoped local file manager"
+
+[android]
+min_sdk = 24
+compile_sdk = 35
+target_sdk = 35
+uses_cleartext_traffic = false

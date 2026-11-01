@@ -1,3 +1,8 @@
+> **2026-11-02 follow-up:** Linux startup picker/native UI testing and Android SAF
+> read-only implementation are being validated. The historical snapshot below is
+> superseded where noted by [the current report](docs/reports/PRODUCTION_READINESS_2026-11-02.md).
+> No production release is claimed.
+
 # AUREX status
 
 Last verified: **2026-11-01**, Linux x86-64 sandbox, Rust 1.88.0 / Cargo 1.88.0.

@@ -1,0 +1,11 @@
+.mobile-app { min-height:100dvh; height:auto; overflow:auto; }
+.mobile-app .topbar { padding-top:max(16px,env(safe-area-inset-top)); }
+.mobile-content { max-width:900px; width:100%; margin:0 auto; padding:24px 18px max(24px,env(safe-area-inset-bottom)); }
+.mobile-content h1 { font-size:28px; margin:12px 0; }
+.mobile-content p { line-height:1.6; color:var(--muted); overflow-wrap:anywhere; }
+.mobile-actions { display:flex; flex-wrap:wrap; gap:12px; margin:18px 0; }
+.mobile-actions button,.mobile-document { min-height:48px; }
+.mobile-actions input { min-width:160px; flex:1; }
+.mobile-document { display:flex; align-items:center; gap:14px; width:100%; text-align:start; padding:14px; margin:4px 0; overflow-wrap:anywhere; }
+.mobile-document span:nth-child(2) { flex:1; }
+.mobile-app .preview-modal { max-height:85dvh; overflow:auto; }

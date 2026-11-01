@@ -14,5 +14,20 @@ resolver = "3"
 aurex-core = { path = "../../crates/aurex-core", version = "=0.1.0" }
 aurex-fs = { path = "../../crates/aurex-fs", version = "=0.1.0" }
 aurex-tasks = { path = "../../crates/aurex-tasks", version = "=0.1.0" }
-dioxus = { version = "=0.7.10", default-features = false, features = ["macro", "html", "signals", "hooks", "launch", "desktop"] }
+dioxus = { version = "=0.7.10", default-features = false, features = ["macro", "html", "signals", "hooks", "launch"] }
 tokio = { version = "=1.51.6", features = ["time"] }
+
+[features]
+default = ["desktop"]
+desktop = ["dioxus/desktop", "dep:rfd"]
+mobile = ["dioxus/mobile", "dep:manganis", "dep:jni", "dep:ndk-context", "dep:serde_json"]
+gui-smoke = ["desktop"]
+
+[target.'cfg(not(target_os = "android"))'.dependencies]
+rfd = { version = "=0.17.2", default-features = false, features = ["xdg-portal"], optional = true }
+
+[target.'cfg(target_os = "android")'.dependencies]
+manganis = { version = "=0.7.10", optional = true }
+jni = { version = "=0.21.1", optional = true }
+ndk-context = { version = "=0.1.1", optional = true }
+serde_json = { version = "=1.0.154", optional = true }

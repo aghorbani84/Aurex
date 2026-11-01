@@ -66,8 +66,8 @@ class ArchiveSafety(unittest.TestCase):
     def test_android_cannot_misreport_packaging_as_verified(self):
         report = platform_gate.inspect_android()
         self.assertFalse(report["packaging_verified"])
-        self.assertEqual(report["state"], "BLOCKED")
-        self.assertFalse(report["checks"]["android_storage_provider"])
+        self.assertIn(report["state"], ["BLOCKED", "PREREQUISITES_ONLY"])
+        self.assertTrue(report["checks"]["android_storage_provider"])
 
     @unittest.skipUnless(platform.system() == "Linux" and platform.machine() == "x86_64", "validated package target only")
     def test_actual_candidate_is_reproducible_and_launches(self):

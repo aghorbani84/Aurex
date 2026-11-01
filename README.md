@@ -17,8 +17,12 @@ errors were fixed. GUI runtime/display/shutdown acceptance is still **NOT TESTED
 strict GUI dependency/license policy still fails. Local crate/native downloads are
 restricted. Compilation is not evidence of a supported graphical application.
 
-Windows and Android filesystem providers, GUI installers, archives, remote connections,
+Windows filesystem support, production GUI installers, archives, remote connections,
 plugins, APK tools, persistence and recursive operations are **not implemented**.
+
+The Linux/Android follow-up adds a Linux startup folder chooser and a real Android
+SAF read-only browser/preview implementation. It is **under native validation**, not
+production-ready. See the [current implementation and release gates](docs/reports/PRODUCTION_READINESS_2026-11-02.md).
 
 ## Quick start: tested Linux core
 
