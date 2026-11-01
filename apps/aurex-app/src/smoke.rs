@@ -1,5 +1,6 @@
 //! Explicit opt-in, feature-gated test probe. No mutation or production auto-exit path.
 use dioxus::prelude::*;
+use dioxus_document as document;
 pub fn install(enabled: bool) {
     use_future(move || async move {
         if !enabled {

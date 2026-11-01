@@ -63,10 +63,10 @@ are exact versions already present in the baseline lockfile.
 | Android artifact unit fixtures | PASS: real ELF header parsing, wrong ABI/4KiB/truncated refusal, debug identity/backup/permissions policy; mocked SDK transport is NOT a device test |
 | `validate_workflows.py` | PASS: six independent workflows, full SHAs/read-only credentials/timeouts/safe shell env |
 | zizmor1.31.1 auditor | PASS locally: no findings; does not audit application/native dependencies |
-| Linux native build + graphical test | Native compile PASS; graphical smoke FAIL in [run 41349270288](https://github.com/aghorbani84/Aurex/actions/runs/41349270288). Added bounded runtime annotations/software-renderer settings; rerun pending |
-| Android native build/APKs | Both native builds produced APKs in [run 41349270135](https://github.com/aghorbani84/Aurex/actions/runs/41349270135), then verifier FAIL: explicit cleartext attribute missing. Corrected config nesting and library manifest; full APK verification rerun pending |
-| Android picker/grant/revocation runtime | Emulator harness added for real system picker, preview, process-restart persistence, forget/cancel and fixture hashes; NOT YET EXECUTED. Physical-device refusal has unit coverage only |
-| Dependency advisory/license gate | [Run 41349270167](https://github.com/aghorbani84/Aurex/actions/runs/41349270167) FAIL: same five advisories/NCSA. Added explicit ARM64 mobile-feature graph; no ignores/allow-list relaxation |
+| Linux native build + graphical test | Native compile PASS again in [run 41349931498](https://github.com/aghorbani84/Aurex/actions/runs/41349931498); smoke-feature compile FAIL before launch. Found missing direct `dioxus-document` import/optional feature; correction and compiler-output capture added, rerun pending |
+| Android native build/APKs | PASS for ARM64 and x86-64 native builds + complete APK verifier in [run 41349931562](https://github.com/aghorbani84/Aurex/actions/runs/41349931562). ARM64 job PASS; x86 runtime step FAIL. Debug APKs only, not production approval |
+| Android picker/grant/revocation runtime | Emulator step FAIL before harness emitted a result in run 41349931562; precise setup/boot cause unknown. Added bounded SDK/AVD/KVM/emulator diagnostics; rerun pending. Physical-device refusal has unit coverage only |
+| Dependency advisory/license gate | [Run 41349270167](https://github.com/aghorbani84/Aurex/actions/runs/41349270167) FAIL: same five advisories/NCSA. Explicit ARM64 mobile-feature graph also executed in [41349931425](https://github.com/aghorbani84/Aurex/actions/runs/41349931425); security still FAIL, no ignores/allow-list relaxation |
 | Production signing/publication | NOT DONE, no secrets/keystores/release publication authorized |
 
 Raw ignored evidence: `artifacts/evidence/production-local-checks.log`,
@@ -84,6 +84,8 @@ The pinned Dioxus Android template contains an explicit loopback-only HTTP excep
 in its generated network-security resource. `usesCleartextTraffic=false` does not
 override that API24+ resource. Engineering APKs must not be represented as completely
 network-denied; review/remove the template exception before production distribution.
+The GUI probe now directly uses the already-locked `dioxus-document`0.7.10 API; no
+additional package versions or Web/wasm packages are introduced for that fix.
 Native SAF now also independently rejects virtual entries and changed document kinds,
 not merely disabled UI buttons. Physical/cloud provider and lifecycle validation remain open.
 
@@ -92,6 +94,8 @@ not merely disabled UI buttons. Physical/cloud provider and lifecycle validation
 - Confirm native source and Gradle integration compile, install/launch APKs and run
   Android picker/cancel/persist/revoke/virtual/cloud-provider/lifecycle tests on real
   framework implementations, including supported API levels/16KiB physical devices.
+- Verify transactional persisted-grant cleanup when switching/releasing grants fails;
+  the current implementation can retain an unused OS grant after a partial failure.
 - Android mutations are not implemented. No Linux provider/CLI is substituted for SAF.
 - Resolve the maintained GTK/WebKit dependency/advisory path and native redistribution
   notices; do not add fake direct upgrades that leave old vulnerable transitives.

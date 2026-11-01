@@ -106,6 +106,7 @@ dependencies = [
  "aurex-fs",
  "aurex-tasks",
  "dioxus",
+ "dioxus-document",
  "jni 0.21.1",
  "manganis",
  "ndk-context",

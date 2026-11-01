@@ -18,7 +18,9 @@ def main():
     try:
         if not report["display"]:
             raise ValueError("a native display (or xvfb-run) is required; no pretend headless pass")
-        subprocess.run(["cargo", "build", "--manifest-path", "apps/aurex-app/Cargo.toml", "--release", "--locked", "--features", "gui-smoke"], cwd=ROOT, check=True, timeout=1800)
+        build = subprocess.run(["cargo", "build", "--manifest-path", "apps/aurex-app/Cargo.toml", "--release", "--locked", "--features", "gui-smoke"], cwd=ROOT, text=True, capture_output=True, timeout=1800)
+        report["diagnostic_tail"] = (build.stdout + build.stderr)[-12000:]
+        build.check_returncode()
         binary = ROOT / "apps/aurex-app/target/release/aurex-app"
         with tempfile.TemporaryDirectory(prefix="aurex-gui-fixture-") as temp:
             root = pathlib.Path(temp)
