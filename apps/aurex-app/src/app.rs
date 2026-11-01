@@ -1,7 +1,7 @@
 use crate::AppContext;
 use aurex_core::{
-    navigation::PaneState, Capability, ConflictPolicy, EntryKind, ListOptions, Location, Operation,
-    OperationKind,
+    Capability, ConflictPolicy, EntryKind, ListOptions, Location, Operation, OperationKind,
+    navigation::PaneState,
 };
 use aurex_fs::FilesystemProvider;
 use aurex_tasks::{Cancellation, Progress};
