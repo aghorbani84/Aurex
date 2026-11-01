@@ -68,7 +68,8 @@ It supports read-only tree selection, persisted read permission, listing/navigat
 filtering, and bounded UTF-8 preview. No broad-storage permission or Android mutation
 controls. Both ARM64 and x86-64 builds/APK verification passed in
 [run 41349931562](https://github.com/aghorbani84/Aurex/actions/runs/41349931562).
-The x86-64 emulator acceptance step failed; runtime support is not established.
+The x86-64 emulator boots and installs the APK, but the first UI assertion fails
+with a Pixel Launcher ANR dialog visible; SAF runtime support is not established.
 
 Use approved user-local tooling: official Rust1.88, JDK17, Android SDK platform and
 build-tools35.0.0, command-line tools, and NDK r28b `28.1.13356709`. The build scripts

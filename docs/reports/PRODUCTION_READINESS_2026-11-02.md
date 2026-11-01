@@ -58,15 +58,15 @@ are exact versions already present in the baseline lockfile.
 
 | Command/gate | Actual result |
 |---|---|
-| `scripts/check.sh` | PASS locally: 44 Rust + 18 Python tests, formatting, strict core Clippy, release CLI |
+| `scripts/check.sh` | PASS locally: 44 Rust + 19 Python tests, formatting, strict core Clippy, release CLI |
 | New document model regressions | PASS: opaque identities, forged/file navigation, atomic foreign-page refusal, stale pages, same-URI grant replacement, malformed URIs and resource limits |
 | Android artifact unit fixtures | PASS: real ELF header parsing, wrong ABI/4KiB/truncated refusal, debug identity/backup/permissions policy; mocked SDK transport is NOT a device test |
 | `validate_workflows.py` | PASS: six independent workflows, full SHAs/read-only credentials/timeouts/safe shell env |
 | zizmor1.31.1 auditor | PASS locally: no findings; does not audit application/native dependencies |
-| Linux native build + graphical test | PASS native build + actual WebView DOM/read-only fixture/navigation/tabs/filter/preview/graceful close in [run 41350752787](https://github.com/aghorbani84/Aurex/actions/runs/41350752787), after correcting probe document API. Not full application certification |
-| Android native build/APKs | PASS for ARM64 and x86-64 native builds + complete APK verifier in [run 41349931562](https://github.com/aghorbani84/Aurex/actions/runs/41349931562). ARM64 job PASS; x86 runtime step FAIL. Debug APKs only, not production approval |
-| Android picker/grant/revocation runtime | [Run 41350752780](https://github.com/aghorbani84/Aurex/actions/runs/41350752780) native/APK checks PASS again; emulator owner FAIL because `adb` was not on PATH, before SAF assertions. Added explicit platform-tools installation/PATH; rerun pending. Physical-device refusal has unit coverage only |
-| Dependency advisory/license gate | [Run 41349270167](https://github.com/aghorbani84/Aurex/actions/runs/41349270167) FAIL: same five advisories/NCSA. Explicit ARM64 mobile-feature graph also executed in [41349931425](https://github.com/aghorbani84/Aurex/actions/runs/41349931425); security still FAIL, no ignores/allow-list relaxation |
+| Linux native build + graphical test | PASS native build + actual WebView DOM/read-only fixture/navigation/tabs/filter/preview/graceful close in [run 41352152358](https://github.com/aghorbani84/Aurex/actions/runs/41352152358), after correcting probe document API. Not full application certification |
+| Android native build/APKs | PASS for ARM64 and x86-64 native builds + complete APK verifier, reconfirmed in [run 41352152344](https://github.com/aghorbani84/Aurex/actions/runs/41352152344). ARM64 job PASS; x86 runtime step FAIL. Debug APKs only, not production approval |
+| Android picker/grant/revocation runtime | FAIL in [run 41352152344](https://github.com/aghorbani84/Aurex/actions/runs/41352152344): private Android35 emulator booted, APK installed, first `Choose a folder` UI assertion timed out with `Pixel Launcher isn't responding / Close app / Wait` visible. SAF behavior remains unverified; do not attribute this to app or infrastructure without further diagnostics |
+| Dependency advisory/license gate | [Run 41349270167](https://github.com/aghorbani84/Aurex/actions/runs/41349270167) FAIL: same five advisories/NCSA. Explicit ARM64 mobile-feature graph also executed; latest [41352152339](https://github.com/aghorbani84/Aurex/actions/runs/41352152339) still FAIL. Mobile findings: fxhash/paste/rand. No ignores/allow-list relaxation |
 | Production signing/publication | NOT DONE, no secrets/keystores/release publication authorized |
 
 Raw ignored evidence: `artifacts/evidence/production-local-checks.log`,
@@ -88,6 +88,26 @@ The GUI probe now directly uses the already-locked `dioxus-document`0.7.10 API; 
 additional package versions or Web/wasm packages are introduced for that fix.
 Native SAF now also independently rejects virtual entries and changed document kinds,
 not merely disabled UI buttons. Physical/cloud provider and lifecycle validation remain open.
+
+## Latest completed hosted matrix
+
+Branch source `1937a54` (PR merge-ref provenance is recorded by the actual artifact),
+with no production signing or publication:
+
+| Workflow | Actual conclusion |
+|---|---|
+| [CI 41352152385](https://github.com/aghorbani84/Aurex/actions/runs/41352152385) | SUCCESS |
+| [Linux 41352152358](https://github.com/aghorbani84/Aurex/actions/runs/41352152358) | SUCCESS, including native WebView fixture and CLI artifact |
+| [Windows 41352152356](https://github.com/aghorbani84/Aurex/actions/runs/41352152356) | SUCCESS compilation/core only; no functional Windows filesystem provider |
+| [Android 41352152344](https://github.com/aghorbani84/Aurex/actions/runs/41352152344) | FAIL overall: both APK verifiers PASS, ARM64 job PASS, x86-64 device UI assertion FAIL |
+| [Security 41352152339](https://github.com/aghorbani84/Aurex/actions/runs/41352152339) | FAIL dependency gate; workflow/secret scanning PASS |
+
+The emulator owner now uses private temporary AVD/user paths shared explicitly by
+avdmanager/emulator, targets its own emulator serial, and always terminates before
+cleaning its owned directory. Installation/wipe setup refuses non-CI hosts; the UI
+harness independently refuses physical devices. These safeguards have unit coverage;
+they are not substitutes for successful device assertions. Initial SDK PATH and AVD
+location failures were corrected before reaching the real framework UI test.
 
 ## Remaining production gates
 
