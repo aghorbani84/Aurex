@@ -1,13 +1,15 @@
 """Real artifact regression fixtures; never extract or execute untrusted archive members."""
 import gzip
 import io
+import contextlib
+from types import SimpleNamespace
 import pathlib
 import platform
 import tarfile
 import tempfile
 import unittest
 from unittest.mock import patch
-from scripts import package, platform_gate
+from scripts import package, platform_gate, audit_dependencies
 
 
 class ArchiveSafety(unittest.TestCase):
@@ -75,6 +77,27 @@ class ArchiveSafety(unittest.TestCase):
             self.assertEqual(a.read_bytes(), b.read_bytes())
             self.assertFalse(package.verify(a)["production_release"])
             self.assertEqual(package.verify(a)["target"], package.TARGET)
+
+
+class AuditFailurePolicy(unittest.TestCase):
+    def test_failure_does_not_skip_other_graphs_or_become_a_pass(self):
+        calls = []
+        def runner(command, **kwargs):
+            calls.append(command)
+            return SimpleNamespace(returncode=1 if len(calls) == 1 else 0, stdout="fixture diagnostic", stderr="")
+        with contextlib.redirect_stdout(io.StringIO()):
+            results = audit_dependencies.collect(runner)
+        self.assertEqual(len(calls), 4)
+        self.assertFalse(all(r["exit_code"] == 0 for r in results))
+        self.assertEqual(results[-1]["check"], "desktop-deny")
+
+    def test_missing_tools_remain_failed_checks(self):
+        def missing(*args, **kwargs):
+            raise FileNotFoundError("controlled missing tool")
+        with contextlib.redirect_stdout(io.StringIO()):
+            results = audit_dependencies.collect(missing)
+        self.assertEqual(len(results), 4)
+        self.assertTrue(all(r["exit_code"] != 0 for r in results))
 
 
 if __name__ == "__main__":

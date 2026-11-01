@@ -11,7 +11,7 @@ error suppression or repository-settings changes are used.
 | build-linux.yml | Validated unsigned CLI candidate archive; independent actual Dioxus release build |
 | build-windows.yml | Native MSVC CLI/help and Dioxus release build; no unusable file-manager package |
 | build-android.yml | Manual **failing readiness gate**, diagnostic JSON only; not APK packaging |
-| security.yml | actionlint 1.7.12, zizmor 1.31.1 auditor, Gitleaks 8.30.1, cargo-audit 0.21.2, cargo-deny 0.20.2 |
+| security.yml | actionlint 1.7.12, zizmor 1.31.1 auditor, Gitleaks 8.30.1, cargo-audit 0.22.2, cargo-deny 0.20.2 |
 | release.yml | Manual CLI engineering artifact build only; cannot publish a Release/tag/deployment |
 
 Android is not implemented, so an honest gate is preferable to speculative SDK/NDK
@@ -54,3 +54,15 @@ unpinned actions, shell context interpolation, credential persistence, broad job
 permissions and hidden failures. It supplements, not replaces, actionlint/zizmor.
 Artifacts are bounded, checksummed, unsigned CLI-only candidates (RELEASES.md).
 See reports/AUREX_ENGINEERING_REPORT.md for actual run links/status, not YAML promises.
+
+### First real GitHub run corrections
+
+GitHub's first execution passed native Linux/Windows core checks and CLI artifact
+runtime tests, but reported Node 20 deprecation for the old action major versions
+and a dependency-audit failure. Action pins were re-verified against current official
+Node 24 releases (checkout 7.0.1, setup-python 7.1.0, setup-go 7.0.0, cache 6.1.0,
+upload-artifact 7.0.2). cargo-audit 0.22.2's tagged MSRV is verified as 1.88.
+The audit runner now executes **all four graphs**, records real exit codes, fails if
+any check fails and emits escaped, bounded error annotations plus a diagnostic
+artifact. No advisory exception or vulnerability suppression was added. This also
+exposes actionable errors when egress blocks the GitHub log storage hostname.

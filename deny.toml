@@ -3,6 +3,7 @@
 ignore = []
 yanked = "deny"
 unmaintained = "all"
+unsound = "all"
 
 [licenses]
 confidence-threshold = 0.93
